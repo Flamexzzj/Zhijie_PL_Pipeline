@@ -1,0 +1,53 @@
+defaults:
+  - dataset: combined
+  - model: ef_model
+  - override hydra/sweeper: basic
+  - _self_
+
+hydra:
+  run:
+    dir: ./outputs/${now:%Y-%m-%d}/S1F11_crossValidate_S1_512/
+  output_subdir: ./hydra/
+
+# Split hyperparameters
+eval_region: Nepal # [null, BEI, CMO, CTO, DKA, GIL, HTX, KTM, NSW, PNE, SPS]
+train_split_pct: 1.0
+
+# General hyperparameters.
+crop_height: 256
+crop_width: 256
+crop_stride: 128
+n_epochs: 1
+lr: 1e-4
+optimizer: adam
+batch_size: 10
+n_workers: 0
+save_topk_models: 3
+ignore_index: 0
+seed_num: 0
+
+
+# Pytorch Lightnight settings.
+profiler: null # [null, simple, advanced]
+limit_train_batches: null # int, maximum number of training batches per epoch.
+limit_val_batches: null # int, maximum number of valiidation batches per epoch.
+
+# Tracking model progress hyperparameters.
+log_image_iter: 200 # How often to log images during training and validation steps
+
+# Data transform hyperparameters.
+norm_mode: null # [null: No normalization, local: each image is normalized separately, global: use precomputed normalization parameters]
+
+# Transforms.
+transforms:
+  hflip:
+    active: True
+    likelihood: 0.5
+  vflip:
+    active: True
+    likelihood: 0.5
+  rotate:
+    active: True
+    likelihood: 0.5
+    min_rot_angle: 0
+    max_rot_angle: 360

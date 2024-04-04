@@ -2,6 +2,7 @@ import os
 import random
 from glob import glob
 from copy import deepcopy
+from pathlib import Path
 
 import cv2
 import torch
@@ -75,13 +76,18 @@ class Combined_Dataset(BaseDataset):
         print("self.root_dir")
         print(self.root_dir)
         print("------------")
-        csdap_region_dirs = sorted(
-            glob(os.path.join(self.root_dir, 'CSDAP') + "/*/"))
-        # print("csdap_region_dirs")
-        # print(csdap_region_dirs)
-        print("------------")
-        # here use -2 instead of -1 because of the extra backslash,when devided by "\\"
-        csdap_region_names = [p.split('/')[-2] for p in csdap_region_dirs]
+        # csdap_region_dirs = sorted(glob(os.path.join(self.root_dir, 'CSDAP') + "/*/"))
+        # print("------------")
+        # # here use -2 instead of -1 because of the extra backslash,when devided by "\\"
+        # csdap_region_names = [p.split('/')[-2] for p in csdap_region_dirs]
+        # Assuming self.root_dir is the base directory path
+        root_dir_path = Path(self.root_dir)
+
+        # Using pathlib's glob method to find all subdirectories within the 'CSDAP' directory
+        csdap_region_dirs = sorted(root_dir_path.glob('CSDAP/*'))
+
+        # Extracting the region names from the paths
+        csdap_region_names = [p.parts[-1] for p in csdap_region_dirs if p.name != '.DS_Store']
         print("csdap_region_names")
         print(csdap_region_names)
         print("------------")
@@ -105,16 +111,26 @@ class Combined_Dataset(BaseDataset):
         self.dataset = []
         for image_path, region_name in image_paths:
             image_name = os.path.splitext(os.path.split(image_path)[1])[0]
+            # breakpoint()
+            # pass
 
             # # Get label path.
             # label_path = os.path.join('/'.join(image_path.split('/')[:-3]),
             #                           'labels', image_name + '.tif')
             
-            # Get label path for Blacksky
-            label_path = os.path.join('/'.join(image_path.split('/')[:-3]),
-                                      'labels', image_name + '.tif')
+            # Get label path
+            # label_path = os.path.join('/'.join(image_path.split('/')[:-3]),
+            #                           'labels', image_name + '.tif')
+            # Assuming image_path is a string path to an image
+            image_path = Path(image_path)
+
+            # Derive label_path
+            label_path = image_path.parents[1] / 'labels' / f'{image_path.stem}.tif'
+
+
                                       
             if os.path.exists(label_path) is False:
+                print('Label file not found for image file: ')
                 breakpoint()
                 pass
 
@@ -222,8 +238,16 @@ class Combined_Dataset(BaseDataset):
 
         # Get image dir and pair with region name.
         for region_name, region_dir in region_dirs.items():
-            # TODO: 
-            region_image_paths = glob(region_dir + f'/{sensor_name}/*.tif')
+            # region_image_paths = glob(region_dir + f'/{sensor_name}/*.tif')
+            # Assuming region_dir and sensor_name are defined and are strings
+            region_dir_path = Path(region_dir)
+
+            # Using pathlib's glob method to find all .tif files for a given sensor
+            region_image_paths = list(region_dir_path.glob(f'{sensor_name}/*.tif'))
+
+            # If you need the paths as strings, you can convert them like this:
+            region_image_paths_str = [str(path) for path in region_image_paths]
+
             if len(region_image_paths) == 0:
                 continue
             for image_dir in region_image_paths:

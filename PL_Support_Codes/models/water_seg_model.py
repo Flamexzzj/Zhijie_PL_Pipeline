@@ -207,6 +207,20 @@ class WaterSegmentationModel(pl.LightningModule):
                 f'No implementation for optimizer of name: {self.optimizer_name}'
             )
         return optimizer
+    def on_before_batch_transfer(self, batch, dataloader_idx=0):
+    # Function to convert tensors to float32, leaving other data types unchanged
+        def to_float32(item):
+            if isinstance(item, torch.Tensor):
+                return item.float()
+            elif isinstance(item, (list, tuple)):
+                return type(item)(to_float32(x) for x in item)
+            elif isinstance(item, dict):
+                return {key: to_float32(value) for key, value in item.items()}
+            else:
+                return item
+
+        return to_float32(batch)
+
 # # TODO:
 #     def validation_epoch_end(self, validation_step_outputs):
 #         if len(validation_step_outputs) == 0:

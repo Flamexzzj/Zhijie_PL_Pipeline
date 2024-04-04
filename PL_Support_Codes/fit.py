@@ -1,5 +1,5 @@
 import os
-
+import torch
 import hydra
 import pytorch_lightning as pl
 from omegaconf import DictConfig
@@ -14,6 +14,7 @@ from PL_Support_Codes.utils.utils_misc import generate_innovation_script
 
 # @hydra.main(version_base="1.1", config_path="conf", config_name="config")
 def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
+    torch.set_default_tensor_type(torch.FloatTensor)
 
     # Get experiment directory.
     if overwrite_exp_dir is None:
@@ -84,7 +85,7 @@ def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
         monitor="val_MulticlassJaccardIndex",
         filename="model-{epoch:02d}-{val_MulticlassJaccardIndex:.4f}")
     trainer = pl.Trainer(max_epochs=cfg.n_epochs,
-                         accelerator="gpu",
+                         accelerator="mps",
                          devices=1,
                          default_root_dir=exp_dir,
                          callbacks=[checkpoint_callback],

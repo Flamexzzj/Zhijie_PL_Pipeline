@@ -76,12 +76,12 @@ class Combined_Dataset(BaseDataset):
         print(self.root_dir)
         print("------------")
         csdap_region_dirs = sorted(
-            glob(os.path.join(self.root_dir, 'CSDAP') + "\\*\\"))
+            glob(os.path.join(self.root_dir, 'CSDAP') + "/*/"))
         # print("csdap_region_dirs")
         # print(csdap_region_dirs)
         print("------------")
         # here use -2 instead of -1 because of the extra backslash,when devided by "\\"
-        csdap_region_names = [p.split('\\')[-2] for p in csdap_region_dirs]
+        csdap_region_names = [p.split('/')[-2] for p in csdap_region_dirs]
         print("csdap_region_names")
         print(csdap_region_names)
         print("------------")
@@ -111,7 +111,7 @@ class Combined_Dataset(BaseDataset):
             #                           'labels', image_name + '.tif')
             
             # Get label path for Blacksky
-            label_path = os.path.join('\\'.join(image_path.split('\\')[:-3]),
+            label_path = os.path.join('/'.join(image_path.split('/')[:-3]),
                                       'labels', image_name + '.tif')
                                       
             if os.path.exists(label_path) is False:
@@ -223,7 +223,7 @@ class Combined_Dataset(BaseDataset):
         # Get image dir and pair with region name.
         for region_name, region_dir in region_dirs.items():
             # TODO: 
-            region_image_paths = glob(region_dir + f'\\{sensor_name}\\*.tif')
+            region_image_paths = glob(region_dir + f'/{sensor_name}/*.tif')
             if len(region_image_paths) == 0:
                 continue
             for image_dir in region_image_paths:

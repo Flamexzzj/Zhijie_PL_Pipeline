@@ -6,7 +6,7 @@ defaults:
 
 hydra:
   run:
-    dir: ./outputs/${now:%Y-%m-%d}/S1F11_crossValidate_S1_512/
+    dir: ../Model_in_progress/${now:%Y-%m-%d}/S1F11_crossValidate_S1_512/
   output_subdir: ./hydra/
 
 # Split hyperparameters
@@ -20,7 +20,7 @@ crop_stride: 128
 n_epochs: 1
 lr: 1e-4
 optimizer: adam
-batch_size: 10
+batch_size: 6
 n_workers: 0
 save_topk_models: 3
 ignore_index: 0

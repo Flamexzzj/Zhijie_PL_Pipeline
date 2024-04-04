@@ -61,12 +61,12 @@ class Batch_Infer_Dataset(BaseDataset):
 
     def _prepare_data(self, sensor_name):
         
-        image_dir = self.root_dir + '\\'
+        image_dir = self.root_dir + '/'
 
 
         self.dataset = []
         n_images = 0
-        region_name = image_dir.split('\\')[-2]
+        region_name = image_dir.split('/')[-2]
         print(region_name)
         image_paths = sorted(glob(image_dir + '*.tif'))
         year = 2019
@@ -81,7 +81,7 @@ class Batch_Infer_Dataset(BaseDataset):
             height, width = image_info.height, image_info.width
 
             # Get image name.
-            image_name = image_path.split('\\')[-1]
+            image_name = image_path.split('/')[-1]
             
             dt = datetime(year, month, day)
 

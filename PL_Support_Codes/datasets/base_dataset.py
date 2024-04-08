@@ -100,7 +100,7 @@ class BaseDataset(Dataset):
             # Make private variable so we can unnormalize it if needed.
             mean = flat_image.mean(axis=1)[:, None, None]
             std = flat_image.std(axis=1)[:, None, None]
-        elif self.norm_mode is None:
+        elif self.norm_mode is None: #substrac 0, and divide 1
             mean = np.zeros([image.shape[0], 1, 1], dtype=image.dtype)
             std = np.ones([image.shape[0], 1, 1], dtype=image.dtype)
         else:

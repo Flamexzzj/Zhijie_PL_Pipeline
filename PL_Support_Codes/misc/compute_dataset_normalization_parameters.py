@@ -49,11 +49,11 @@ def compute_dataset_normalization_parameters(dataset, subsample_pct=None):
                                        replace=False)
             dem_pixels = np.take(dem_pixels, indices, axis=1)
 
-        if dem_values is None:
-            # Initial dem_pixels.
-            dem_values = dem_pixels
-        else:
-            dem_values = np.concatenate((dem_values, dem_pixels), axis=1)
+            if dem_values is None:
+                # Initial dem_pixels.
+                dem_values = dem_pixels
+            else:
+                dem_values = np.concatenate((dem_values, dem_pixels), axis=1)
 
         if dataset.slope:
             slope_pixels = example['slope'][:, x, y]
@@ -64,11 +64,11 @@ def compute_dataset_normalization_parameters(dataset, subsample_pct=None):
                                        replace=False)
             slope_pixels = np.take(slope_pixels, indices, axis=1)
 
-        if slope_values is None:
-            # Initial slope_pixels.
-            slope_values = slope_pixels
-        else:
-            slope_values = np.concatenate((slope_values, slope_pixels), axis=1)
+            if slope_values is None:
+                # Initial slope_pixels.
+                slope_values = slope_pixels
+            else:
+                slope_values = np.concatenate((slope_values, slope_pixels), axis=1)
 
     norm_params = {
         dataset.sensor: {
@@ -133,7 +133,9 @@ def main():
                             norm_mode=None,
                             sensor=args.sensor_name,
                             dem=args.include_dem,
-                            slope=args.include_slope)
+                            slope=args.include_slope,
+                            eval_region = None,
+                            channels = 'ALL')
 
     # Check save path for normalization parameters.
     if args.norm_save_path is None:

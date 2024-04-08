@@ -115,13 +115,6 @@ class Combined_Dataset(BaseDataset):
             # pass
 
             # # Get label path.
-            # label_path = os.path.join('/'.join(image_path.split('/')[:-3]),
-            #                           'labels', image_name + '.tif')
-            
-            # Get label path
-            # label_path = os.path.join('/'.join(image_path.split('/')[:-3]),
-            #                           'labels', image_name + '.tif')
-            # Assuming image_path is a string path to an image
             image_path = Path(image_path)
 
             # Derive label_path
@@ -346,7 +339,7 @@ class Combined_Dataset(BaseDataset):
             crop_params (CropParam): An object containing crop parameters (see CropParam definition).
             channels (str): A string codeword describing which channels should be collected from image.
             resize_dims (list, optional): Dimensions describing what size to resize the image to. Defaults to [None, None].
-            backend (str, optional): Which library to use for loading image. Defaults to 'rasterio'.
+            backend (str, optional): Which library to use for loading image. Defaults to 'tifffile'.
 
         Returns:
             np.array: A numpy array of size [channels, height, width].
@@ -412,7 +405,7 @@ class Combined_Dataset(BaseDataset):
             crop_params (CropParam): An object containing crop parameters (see CropParam definition).
             channels (str): A string codeword describing which channels should be collected from image.
             resize_dims (list, optional): Dimensions describing what size to resize the image to. Defaults to [None, None].
-            backend (str, optional): Which library to use for loading image. Defaults to 'rasterio'.
+            backend (str, optional): Which library to use for loading image. Defaults to 'tifffile'.
 
         Returns:
             np.array: A numpy array of size [channels, height, width].
@@ -468,7 +461,7 @@ class Combined_Dataset(BaseDataset):
             crop_params (CropParam): An object containing crop parameters (see CropParam definition).
             channels (str): A string codeword describing which channels should be collected from image.
             resize_dims (list, optional): Dimensions describing what size to resize the image to. Defaults to [None, None].
-            backend (str, optional): Which library to use for loading image. Defaults to 'rasterio'.
+            backend (str, optional): Which library to use for loading image. Defaults to 'tifffile'.
 
         Returns:
             np.array: A numpy array of size [channels, height, width].
@@ -476,11 +469,13 @@ class Combined_Dataset(BaseDataset):
         # Load image.
         if backend == 'rasterio':
             image = rasterio.open(
-                image_path).read()  # [height, width, channels]
-            image = image.transpose(2, 0, 1)  # [channels, height, width]
+                image_path).read()  # [channels, height, width]
+   
         elif backend == 'tifffile':
             image = tifffile.imread(image_path)  # [height, width, channels]
             image = image.transpose(2, 0, 1)  # [channels, height, width]
+            # breakpoint()
+            # pass
         else:
             raise NotImplementedError(
                 f'No method for loading image with backend "{backend}"')
@@ -531,7 +526,7 @@ class Combined_Dataset(BaseDataset):
             crop_params (CropParam): An object containing crop parameters (see CropParam definition).
             channels (str): A string codeword describing which channels should be collected from image.
             resize_dims (list, optional): Dimensions describing what size to resize the image to. Defaults to [None, None].
-            backend (str, optional): Which library to use for loading image. Defaults to 'rasterio'.
+            backend (str, optional): Which library to use for loading image. Defaults to 'tifffile'.
 
         Returns:
             np.array: A numpy array of size [channels, height, width].

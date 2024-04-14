@@ -1,5 +1,10 @@
+# defaults:
+#   - dataset: combined
+#   - model: ef_model
+#   - override hydra/sweeper: basic
+#   - _self_
+
 defaults:
-  - dataset: combined
   - model: ef_model
   - override hydra/sweeper: basic
   - _self_
@@ -9,6 +14,12 @@ hydra:
     dir: ../Model_in_progress/${now:%Y-%m-%d}/S1F11_crossValidate_S1_512/
   output_subdir: ./hydra/
 
+dataset_name: combined
+dataset_sensor: PS
+dataset_channels: ALL
+dataset_kwargs:
+  dem: False
+  slope: False
 # Split hyperparameters
 eval_region: Nepal # [null, BEI, CMO, CTO, DKA, GIL, HTX, KTM, NSW, PNE, SPS]
 train_split_pct: 1.0

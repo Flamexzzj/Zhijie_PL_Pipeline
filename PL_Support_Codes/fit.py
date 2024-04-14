@@ -26,32 +26,32 @@ def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
     slice_params = generate_image_slice_object(cfg.crop_height, cfg.crop_width,
                                                cfg.crop_stride)
 
-    if cfg.dataset.dataset_kwargs is None:
-        cfg.dataset.dataset_kwargs = {}
+    if cfg.dataset_kwargs is None:
+        cfg.dataset_kwargs = {}
 
-    train_dataset = build_dataset(cfg.dataset.name,
+    train_dataset = build_dataset(cfg.dataset_name,
                                   'train',
                                   slice_params,
-                                  sensor=cfg.dataset.sensor,
-                                  channels=cfg.dataset.channels,
+                                  sensor=cfg.dataset_sensor,
+                                  channels=cfg.dataset_channels,
                                   norm_mode=cfg.norm_mode,
                                   eval_region=cfg.eval_region,
                                   ignore_index=cfg.ignore_index,
                                   seed_num=cfg.seed_num,
                                   train_split_pct=cfg.train_split_pct,
                                   transforms=cfg.transforms,
-                                  **cfg.dataset.dataset_kwargs)
-    valid_dataset = build_dataset(cfg.dataset.name,
+                                  **cfg.dataset_kwargs)
+    valid_dataset = build_dataset(cfg.dataset_name,
                                   'valid',
                                   slice_params,
-                                  sensor=cfg.dataset.sensor,
-                                  channels=cfg.dataset.channels,
+                                  sensor=cfg.dataset_sensor,
+                                  channels=cfg.dataset_channels,
                                   norm_mode=cfg.norm_mode,
                                   eval_region=cfg.eval_region,
                                   ignore_index=cfg.ignore_index,
                                   seed_num=cfg.seed_num,
                                   train_split_pct=cfg.train_split_pct,
-                                  **cfg.dataset.dataset_kwargs)
+                                  **cfg.dataset_kwargs)
 
     # Create dataloaders.
     train_loader = DataLoader(train_dataset,
@@ -85,7 +85,7 @@ def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
         monitor="val_MulticlassJaccardIndex",
         filename="model-{epoch:02d}-{val_MulticlassJaccardIndex:.4f}")
     trainer = pl.Trainer(max_epochs=cfg.n_epochs,
-                         accelerator="mps",
+                         accelerator="gpu", #this will automatically find CUDA or MPS devices
                          devices=1,
                          default_root_dir=exp_dir,
                          callbacks=[checkpoint_callback],

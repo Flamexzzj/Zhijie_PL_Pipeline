@@ -507,7 +507,7 @@ class Combined_Dataset(BaseDataset):
         if crop_params is not None:
             image = self._crop_image(image, crop_params)
 
-        # Already normalized to [0,1].
+        # Already standardized to [0,1].
         if image.dtype == 'uint16':
             image = image / 2**16
 

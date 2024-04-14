@@ -25,6 +25,7 @@ class BaseDataset(Dataset):
                  transforms=None,
                  sensor='S2',
                  channels=None,
+                 n_classes=3,
                  seed_num=0,
                  norm_mode=None,
                  ignore_index=-1,
@@ -38,6 +39,7 @@ class BaseDataset(Dataset):
         self.sensor = sensor
         self.root_dir = root_dir
         self.seed_num = seed_num
+        self.n_classes = n_classes
         self.dset_name = dset_name
         self.norm_mode = norm_mode
         self.transforms = transforms

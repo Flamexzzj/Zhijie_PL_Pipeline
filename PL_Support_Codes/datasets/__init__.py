@@ -39,7 +39,7 @@ def tensors_and_lists_collate_fn(data):
 
 
 def build_dataset(dset_name, split, slice_params, eval_region, sensor,
-                  channels, **kwargs):
+                  channels, n_classes, **kwargs):
     dset_root_dir = get_dset_path(dset_name)
 
     try:
@@ -48,6 +48,7 @@ def build_dataset(dset_name, split, slice_params, eval_region, sensor,
                                       split,
                                       slice_params,
                                       channels=channels,
+                                      n_classes=n_classes,
                                       eval_region=eval_region,
                                       sensor=sensor,
                                       **kwargs)

@@ -25,6 +25,7 @@ class Batch_Infer_Dataset(BaseDataset):
                  channels=None,
                  dset_name="thp_timeseries",
                  seed_num=0,
+                 n_classes=3,
                  output_metadata=False,
                  norm_mode=None,
                  dem=False,
@@ -35,6 +36,7 @@ class Batch_Infer_Dataset(BaseDataset):
                  hand=False,
                  ignore_index=-1,
                  train_split_pct=0.8):
+        self.n_classes = n_classes
 
         super(Batch_Infer_Dataset,
               self).__init__(dset_name,
@@ -46,11 +48,11 @@ class Batch_Infer_Dataset(BaseDataset):
                              sensor=sensor,
                              channels=channels,
                              seed_num=seed_num,
+                             n_classes=n_classes,
                              norm_mode=norm_mode,
                              ignore_index=ignore_index,
                              train_split_pct=train_split_pct)
 
-        self.n_classes = 3
         self.output_metadata = output_metadata
 
         # Prepare data depending on sensor.

@@ -32,7 +32,6 @@ class WaterSegmentationModel(pl.LightningModule):
         self.any_test_steps_executed = False
         #TODO：
 
-
         # Build model.
         self._build_model()
 
@@ -47,6 +46,17 @@ class WaterSegmentationModel(pl.LightningModule):
         # Log images hyperparamters.
         self.to_rgb_fcn = to_rgb_fcn
         self.log_image_iter = log_image_iter
+        print("!!!!!!!!!!!!")
+        print("!!!!!!!!!!!!")
+        print(n_classes)
+        print(in_channels)
+        print(ignore_index)
+        print(optimizer_name)
+        print(lr)
+        print("!!!!!!!!!!!!")
+        print("!!!!!!!!!!!!")
+
+
 
     def _get_tracked_metrics(self, average_mode='micro'):
         metrics = torchmetrics.MetricCollection([

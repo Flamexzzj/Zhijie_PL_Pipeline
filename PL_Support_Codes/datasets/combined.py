@@ -29,6 +29,7 @@ class Combined_Dataset(BaseDataset):
                  channels=None,
                  dset_name="combined",
                  seed_num=0,
+                 n_classes=3,
                  output_metadata=False,
                  norm_mode=None,
                  dem=False,
@@ -45,6 +46,7 @@ class Combined_Dataset(BaseDataset):
         self.slope = slope
         self.chirps = chirps
         self.preflood = preflood
+        self.n_classes = n_classes
         self.pre_post_difference = pre_post_difference
 
         super(Combined_Dataset, self).__init__(dset_name,
@@ -56,11 +58,12 @@ class Combined_Dataset(BaseDataset):
                                                sensor=sensor,
                                                channels=channels,
                                                seed_num=seed_num,
+                                               n_classes=n_classes,
                                                norm_mode=norm_mode,
                                                ignore_index=ignore_index,
                                                train_split_pct=train_split_pct)
 
-        self.n_classes = 3
+        
         self.output_metadata = output_metadata
 
         # Prepare data depending on sensor.
@@ -76,6 +79,7 @@ class Combined_Dataset(BaseDataset):
         print("self.root_dir")
         print(self.root_dir)
         print("------------")
+        print("Number of Classes: ", self.n_classes)
         # csdap_region_dirs = sorted(glob(os.path.join(self.root_dir, 'CSDAP') + "/*/"))
         # print("------------")
         # # here use -2 instead of -1 because of the extra backslash,when devided by "\\"

@@ -14,12 +14,21 @@ hydra:
     dir: ../Model_in_progress/${now:%Y-%m-%d}/S1F11_crossValidate_S1_512/
   output_subdir: ./hydra/
 
+# Dataset parameters
 dataset_name: combined
 dataset_sensor: PS
 dataset_channels: ALL
 dataset_kwargs:
   dem: False
   slope: False
+
+# Model parameters
+model_name: ef_model # ef_model, lf_model
+model_kwargs:
+  optimizer_name: adam
+  # only apply for lf_model
+  #feat_fusion: concat_conv 
+
 # Split hyperparameters
 eval_region: Nepal # [null, BEI, CMO, CTO, DKA, GIL, HTX, KTM, NSW, PNE, SPS]
 train_split_pct: 1.0

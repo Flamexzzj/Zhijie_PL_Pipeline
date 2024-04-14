@@ -64,14 +64,14 @@ def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
                               num_workers=cfg.n_workers)
 
     # Create model.
-    model = build_model(cfg.model.name,
+    model = build_model(cfg.model_name,
                         train_dataset.n_channels,
                         train_dataset.n_classes,
                         cfg.lr,
                         log_image_iter=cfg.log_image_iter,
                         to_rgb_fcn=train_dataset.to_RGB,
                         ignore_index=train_dataset.ignore_index,
-                        **cfg.model.model_kwargs)
+                        **cfg.model_kwargs)
 
     # Create logger.
     logger = pl.loggers.TensorBoardLogger(

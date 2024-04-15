@@ -3,7 +3,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import models
 
-
+###################################################################################################################################
+# This part is used for Unet_Original
+###################################################################################################################################
 class DoubleConv(nn.Module):
     """(convolution => [BN] => ReLU) * 2"""
 
@@ -78,10 +80,10 @@ class OutConv(nn.Module):
         return self.conv(x)
 
 #TODO:
-class UNet_orig(nn.Module):
+class UNet_Orig(nn.Module):
     # https://github.com/milesial/Pytorch-UNet/tree/master/unet
     def __init__(self, n_channels, n_classes, bilinear=True):
-        super(UNet_orig, self).__init__()
+        super(UNet_Orig, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
         self.bilinear = bilinear
@@ -130,7 +132,16 @@ class UNet_orig(nn.Module):
         x = self.up4(x, x1)
         logits = self.outc(x)
         return logits
+###################################################################################################################################
+# This is the end of Unet_Original
+###################################################################################################################################
 
+
+
+
+###################################################################################################################################
+# This part is used for UNet with CBAM
+###################################################################################################################################
 class ChannelAttention(nn.Module):
     def __init__(self, in_planes, ratio=16):
         super(ChannelAttention, self).__init__()
@@ -182,9 +193,9 @@ class CBAM(nn.Module):
 
 
 #TODO: 
-class UNet(nn.Module):
+class UNet_CBAM(nn.Module):
     def __init__(self, n_channels, n_classes):
-        super(UNet, self).__init__()
+        super(UNet_CBAM, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
 
@@ -329,7 +340,18 @@ class UNet(nn.Module):
         _, _, H, W = bypass.size()
         upsampled = F.interpolate(upsampled, size=(H, W), mode='bilinear', align_corners=True)
         return torch.cat([upsampled,bypass],dim=1)
+###################################################################################################################################
+# End of UNet with CBAM
+###################################################################################################################################
 
+
+
+
+
+
+###################################################################################################################################
+# This part is used for late fusion model
+###################################################################################################################################
 class UNetEncoder(nn.Module):
 
     def __init__(self, n_channels, bilinear=True, base_feat_channels=64):
@@ -397,7 +419,9 @@ class UNetDecoder(nn.Module):
         x = self.up3(x, x2)
         x = self.up4(x, x1)
         return x
-
+###################################################################################################################################
+# End of late fusion model
+###################################################################################################################################
 
 if __name__ == '__main__':
     # Create an example input to model.

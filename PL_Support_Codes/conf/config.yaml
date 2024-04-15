@@ -18,7 +18,7 @@ dataset_kwargs:
 
 # Model parameters
 model_name: ef_model # ef_model, lf_model
-model_used: unet # unet, unet_orig, unet_cbam
+model_used: unet_cbam # net_orig, unet_cbam
 model_n_classes: 3 # one class for ignore index, one for not water and one for water
 model_kwargs:
   optimizer_name: adam

@@ -7,9 +7,9 @@ import torchmetrics
 from einops import rearrange
 import pytorch_lightning as pl
 
-# from PL_Support_Codes.models.unet import UNet_orig
-# from PL_Support_Codes.models.unet import UNet_CBAM
-from PL_Support_Codes.models.unet import UNet
+from PL_Support_Codes.models.unet import UNet_Orig
+from PL_Support_Codes.models.unet import UNet_CBAM
+# from PL_Support_Codes.models.unet import UNet
 from PL_Support_Codes.tools import create_conf_matrix_pred_image
 
 
@@ -100,7 +100,8 @@ class WaterSegmentationModel(pl.LightningModule):
             for feature_channels in self.in_channels.values():
                 n_in_channels += feature_channels
         MODELS_USED = {
-            'unet': UNet
+            'unet_orig': UNet_Orig,
+            'unet_cbam': UNet_CBAM
         }
         self.model = MODELS_USED[self.model_used](n_in_channels, self.n_classes)
 

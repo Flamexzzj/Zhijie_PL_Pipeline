@@ -12,6 +12,7 @@ class EarlyFusionModel(WaterSegmentationModel):
                  log_image_iter=50,
                  to_rgb_fcn=None,
                  ignore_index=None,
+                 model_used = None,
                  optimizer_name='adam'):
         super().__init__(in_channels,
                          n_classes,
@@ -19,6 +20,7 @@ class EarlyFusionModel(WaterSegmentationModel):
                          log_image_iter,
                          to_rgb_fcn,
                          ignore_index=ignore_index,
+                         model_used=model_used,
                          optimizer_name=optimizer_name)
 
     def forward(self, batch):

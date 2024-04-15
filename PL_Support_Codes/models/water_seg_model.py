@@ -7,6 +7,8 @@ import torchmetrics
 from einops import rearrange
 import pytorch_lightning as pl
 
+# from PL_Support_Codes.models.unet import UNet_orig
+# from PL_Support_Codes.models.unet import UNet_CBAM
 from PL_Support_Codes.models.unet import UNet
 from PL_Support_Codes.tools import create_conf_matrix_pred_image
 
@@ -20,9 +22,11 @@ class WaterSegmentationModel(pl.LightningModule):
                  log_image_iter=50,
                  to_rgb_fcn=None,
                  ignore_index=None,
+                 model_used=None,
                  optimizer_name='adam'):
         super().__init__()
         self.lr = lr
+        self.model_used = model_used
         self.n_classes = n_classes
         self.in_channels = in_channels
         self.ignore_index = ignore_index
@@ -48,6 +52,7 @@ class WaterSegmentationModel(pl.LightningModule):
         self.log_image_iter = log_image_iter
         print("!!!!!!!!!!!!")
         print("!!!!!!!!!!!!")
+        print(model_used)
         print(n_classes)
         print(in_channels)
         print(ignore_index)
@@ -94,7 +99,10 @@ class WaterSegmentationModel(pl.LightningModule):
             n_in_channels = 0
             for feature_channels in self.in_channels.values():
                 n_in_channels += feature_channels
-        self.model = UNet(n_in_channels, self.n_classes)
+        MODELS_USED = {
+            'unet': UNet
+        }
+        self.model = MODELS_USED[self.model_used](n_in_channels, self.n_classes)
 
     def forward(self, batch):
         images = batch['image']

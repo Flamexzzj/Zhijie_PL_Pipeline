@@ -73,6 +73,7 @@ def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
                         log_image_iter=cfg.log_image_iter,
                         to_rgb_fcn=train_dataset.to_RGB,
                         ignore_index=train_dataset.ignore_index,
+                        model_used=cfg.model_used,
                         **cfg.model_kwargs)
 
     # Create logger.

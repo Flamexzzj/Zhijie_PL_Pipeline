@@ -15,6 +15,7 @@ class LateFusionModel(WaterSegmentationModel):
                  log_image_iter=50,
                  to_rgb_fcn=None,
                  ignore_index=None,
+                 model_used=None,
                  optimizer_name='adam',
                  feat_fusion='concat_conv'):
         self.feat_fusion = feat_fusion
@@ -24,7 +25,8 @@ class LateFusionModel(WaterSegmentationModel):
                          log_image_iter=log_image_iter,
                          to_rgb_fcn=to_rgb_fcn,
                          optimizer_name=optimizer_name,
-                         ignore_index=ignore_index)
+                         ignore_index=ignore_index,
+                         model_used=model_used)
 
     def _build_model(self):
         # Build models.

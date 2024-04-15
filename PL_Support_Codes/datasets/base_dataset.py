@@ -295,6 +295,7 @@ class BaseDataset(Dataset):
         Returns:
             np.array: A numpy array of shape [desired_height, desired_width].
         """
+
         # Get image dimensions.
         n_dims = len(image.shape)
         if n_dims == 2:
@@ -306,8 +307,12 @@ class BaseDataset(Dataset):
                 f'Cannot add buffer to image with "{n_dims}" dimensions.')
 
         # Check if image is smaller than desired resolution.
-        if (image_height >= desired_height) and (image_width >= desired_width):
+        if (image_height == desired_height) and (image_width == desired_width):
             return image
+        elif (image_height > desired_height) and (image_width > desired_width):
+            print('Image is larger than desired resolution. Error!!')
+            breakpoint()
+            pass
         else:
             if buffer_mode == 'constant':
                 # Create buffer canvas.
@@ -326,6 +331,7 @@ class BaseDataset(Dataset):
                     f'No method to handle buffer mode of "{buffer_mode}"')
 
         return image
+    
 
     def _crop_image(self, image, crop_params):
         h0, w0 = crop_params.h0, crop_params.w0

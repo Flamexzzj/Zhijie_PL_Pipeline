@@ -355,6 +355,7 @@ class Combined_Dataset(BaseDataset):
             # image = rearrange(image, 'h w c -> c h w')
         elif backend == 'tifffile':
             image = tifffile.imread(image_path)  # [channels, height, width]
+            image = image.transpose(2, 0, 1)  # [channels, height, width]
 
         else:
             raise NotImplementedError(
@@ -420,6 +421,7 @@ class Combined_Dataset(BaseDataset):
                 image_path).read()  # [channels, height, width]
         elif backend == 'tifffile':
             image = tifffile.imread(image_path)  # [channels, height, width]
+            image = image.transpose(2, 0, 1)  # [channels, height, width]
         else:
             raise NotImplementedError(
                 f'No method for loading image with backend "{backend}"')

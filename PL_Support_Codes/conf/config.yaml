@@ -21,7 +21,8 @@ model_name: ef_model # ef_model, lf_model
 model_used: unet_cbam # net_orig, unet_cbam
 model_n_classes: 3 # one class for ignore index, one for not water and one for water
 model_kwargs:
-  optimizer_name: adam
+# [adam, sgd, adamw, adamax, adadelta, adagrad, rmsprop, rprop, asgd, lbfgs, sparse_adam, radam, nadam]
+  optimizer_name: sgd
   # only apply for lf_model
   #feat_fusion: concat_conv 
 
@@ -35,7 +36,8 @@ crop_width: 256
 crop_stride: 128
 n_epochs: 1
 lr: 1e-4
-optimizer: adam
+# optimizer: adamw
+# [adam, sgd, adamw, adamax, adadelta, adagrad, rmsprop, rprop, asgd, lbfgs, sparse_adam, radam, nadam]
 batch_size: 6
 n_workers: 0
 save_topk_models: 3

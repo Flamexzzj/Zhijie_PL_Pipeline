@@ -65,7 +65,12 @@ def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
                               shuffle=False,
                               num_workers=cfg.n_workers)
 
+
     # Create model.
+    print("This is fit.py, printing cfg.model_kwargs")
+    print(cfg.model_kwargs)
+    print("end of printing cfg.model_kwargs")
+    
     model = build_model(cfg.model_name,
                         train_dataset.n_channels,
                         train_dataset.n_classes,

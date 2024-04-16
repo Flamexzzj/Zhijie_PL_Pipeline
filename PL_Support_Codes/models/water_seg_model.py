@@ -23,14 +23,14 @@ class WaterSegmentationModel(pl.LightningModule):
                  to_rgb_fcn=None,
                  ignore_index=None,
                  model_used=None,
-                 optimizer_name='adam'):
+                 optimizer_name=None):
         super().__init__()
         self.lr = lr
         self.model_used = model_used
+        self.optimizer_name = optimizer_name
         self.n_classes = n_classes
         self.in_channels = in_channels
         self.ignore_index = ignore_index
-        self.optimizer_name = optimizer_name
         #TODO：
         self.any_validation_steps_executed = False
         self.any_test_steps_executed = False
@@ -52,11 +52,11 @@ class WaterSegmentationModel(pl.LightningModule):
         self.log_image_iter = log_image_iter
         print("!!!!!!!!!!!!")
         print("!!!!!!!!!!!!")
-        print(model_used)
-        print(n_classes)
+        print("Model used: ",model_used)
+        print("n_classes: ", n_classes)
         print(in_channels)
         print(ignore_index)
-        print(optimizer_name)
+        print("optimizer_name: ",optimizer_name)
         print(lr)
         print("!!!!!!!!!!!!")
         print("!!!!!!!!!!!!")
@@ -103,6 +103,7 @@ class WaterSegmentationModel(pl.LightningModule):
             'unet_orig': UNet_Orig,
             'unet_cbam': UNet_CBAM
         }
+        print("Model used!!!!!!!!!: ",MODELS_USED[self.model_used])
         self.model = MODELS_USED[self.model_used](n_in_channels, self.n_classes)
 
     def forward(self, batch):
@@ -219,12 +220,22 @@ class WaterSegmentationModel(pl.LightningModule):
                       on_epoch=True)
 
     def configure_optimizers(self):
-        if self.optimizer_name == 'adam':
-            optimizer = optim.Adam(self.parameters(), lr=self.lr)
-        else:
-            raise NotImplementedError(
-                f'No implementation for optimizer of name: {self.optimizer_name}'
-            )
+        OPTIMIZERS = {
+            'adam': optim.Adam,
+            'sgd': optim.SGD,
+            'adamw': optim.AdamW,
+            'adamax': optim.Adamax,
+            'adadelta': optim.Adadelta,
+            'adagrad': optim.Adagrad,
+            'rmsprop': optim.RMSprop,
+            'rprop': optim.Rprop,
+            'asgd': optim.ASGD,
+            'lbfgs': optim.LBFGS,
+            'sparse_adam': optim.SparseAdam,
+            'radam': optim.RAdam,
+            'nadam': optim.NAdam,
+        }
+        optimizer = OPTIMIZERS[self.optimizer_name](self.parameters(), lr=self.lr)
         return optimizer
     def on_before_batch_transfer(self, batch, dataloader_idx=0):
     # Function to convert tensors to float32, leaving other data types unchanged

@@ -13,7 +13,9 @@ class EarlyFusionModel(WaterSegmentationModel):
                  to_rgb_fcn=None,
                  ignore_index=None,
                  model_used = None,
-                 optimizer_name='adam'):
+                 optimizer_name=None):
+        self.model_used = model_used
+        self.optimizer_name = optimizer_name
         super().__init__(in_channels,
                          n_classes,
                          lr,

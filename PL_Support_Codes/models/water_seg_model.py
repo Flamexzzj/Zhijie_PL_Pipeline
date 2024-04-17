@@ -23,10 +23,18 @@ class WaterSegmentationModel(pl.LightningModule):
                  to_rgb_fcn=None,
                  ignore_index=None,
                  model_used=None,
+                 model_loss_fn_a=None,
+                 model_loss_fn_b=None,
+                 model_loss_fn_a_ratio=None,
+                 model_loss_fn_b_ratio=None,
                  optimizer_name=None):
         super().__init__()
         self.lr = lr
         self.model_used = model_used
+        self.model_loss_fn_a = model_loss_fn_a
+        self.model_loss_fn_b = model_loss_fn_b
+        self.model_loss_fn_a_ratio = model_loss_fn_a_ratio
+        self.model_loss_fn_b_ratio = model_loss_fn_b_ratio
         self.optimizer_name = optimizer_name
         self.n_classes = n_classes
         self.in_channels = in_channels
@@ -44,8 +52,13 @@ class WaterSegmentationModel(pl.LightningModule):
             self.ignore_index = self.n_classes - 1
         self.tracked_metrics = self._get_tracked_metrics()
 
+        LOSS_FUNCS ={
+            'cross_entropy': nn.CrossEntropyLoss
+        }
+        
         # Get loss function.
-        self.loss_func = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
+        self.loss_func_a = LOSS_FUNCS[self.model_loss_fn_a](ignore_index=self.ignore_index)
+        self.loss_func_b = LOSS_FUNCS[self.model_loss_fn_b](ignore_index=self.ignore_index)
 
         # Log images hyperparamters.
         self.to_rgb_fcn = to_rgb_fcn
@@ -122,7 +135,7 @@ class WaterSegmentationModel(pl.LightningModule):
         images, target = batch['image'], batch['target']
         output = self.forward(batch)
 
-        loss = self.loss_func(output, target)
+        loss = self.model_loss_fn_a_ratio * self.loss_func_a(output, target) + self.model_loss_fn_b_ratio * self.loss_func_b(output, target)
         if torch.isnan(loss):
             # Happens when all numbers are ignore numbers.
             loss = torch.nan_to_num(loss)
@@ -163,7 +176,7 @@ class WaterSegmentationModel(pl.LightningModule):
         images, target = batch['image'], batch['target']
         output = self.forward(batch)
 
-        loss = self.loss_func(output, target)
+        loss = self.model_loss_fn_a_ratio * self.loss_func_a(output, target) + self.model_loss_fn_b_ratio * self.loss_func_b(output, target)
         if torch.isnan(loss):
             # Happens when all numbers are ignore numbers.
             loss = torch.nan_to_num(loss)
@@ -205,8 +218,9 @@ class WaterSegmentationModel(pl.LightningModule):
         self.any_test_steps_executed = True
         self._set_model_to_eval()
         output = self.forward(batch)
+        target = batch['target']
 
-        loss = self.loss_func(output, batch['target'])
+        loss = self.model_loss_fn_a_ratio * self.loss_func_a(output, target) + self.model_loss_fn_b_ratio * self.loss_func_b(output, target)
 
         # Track metrics.
         pred = output.argmax(dim=1)

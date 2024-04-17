@@ -70,7 +70,7 @@ def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
     print("This is fit.py, printing cfg.model_kwargs")
     print(cfg.model_kwargs)
     print("end of printing cfg.model_kwargs")
-    
+
     model = build_model(cfg.model_name,
                         train_dataset.n_channels,
                         train_dataset.n_classes,
@@ -79,6 +79,10 @@ def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
                         to_rgb_fcn=train_dataset.to_RGB,
                         ignore_index=train_dataset.ignore_index,
                         model_used=cfg.model_used,
+                        model_loss_fn_a=cfg.model_loss_fn_a,
+                        model_loss_fn_b=cfg.model_loss_fn_b,
+                        model_loss_fn_a_ratio=cfg.model_loss_fn_a_ratio,
+                        model_loss_fn_b_ratio=cfg.model_loss_fn_b_ratio,
                         **cfg.model_kwargs)
 
     # Create logger.

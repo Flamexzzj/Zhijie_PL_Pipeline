@@ -20,6 +20,10 @@ dataset_kwargs:
 model_name: ef_model # ef_model, lf_model
 model_used: unet_cbam # net_orig, unet_cbam
 model_n_classes: 3 # one class for ignore index, one for not water and one for water
+model_loss_fn_a: cross_entropy # cross_entropy, focal_loss, dice_loss, tversky_loss, tversky_focal_loss
+model_loss_fn_a_ratio: 1.0
+model_loss_fn_b: cross_entropy # cross_entropy, focal_loss, dice_loss, tversky_loss, tversky_focal_loss
+model_loss_fn_b_ratio: 0.0
 model_kwargs:
 # [adam, sgd, adamw, adamax, adadelta, adagrad, rmsprop, rprop, asgd, lbfgs, sparse_adam, radam, nadam]
   optimizer_name: sgd

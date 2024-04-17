@@ -10,7 +10,7 @@ MODELS = {
 
 
 def build_model(model_name, input_channels, n_classes, lr, log_image_iter,
-                to_rgb_fcn, ignore_index, model_used, optimizer_name, **kwargs):
+                to_rgb_fcn, ignore_index, model_used, model_loss_fn_a, model_loss_fn_b,  model_loss_fn_a_ratio, model_loss_fn_b_ratio, optimizer_name, **kwargs):
     try:
         print('!!!!!!!')
         print('!!!!!!!')
@@ -20,10 +20,16 @@ def build_model(model_name, input_channels, n_classes, lr, log_image_iter,
         print('!!!!!!!')
         print('!!!!!!!')
         print('!!!!!!!')
+        print(MODELS[model_name])
+
+        print('!!!!!!!')
+        print('!!!!!!!')
 
         model = MODELS[model_name](input_channels, n_classes, lr,
-                                   log_image_iter, to_rgb_fcn, ignore_index, model_used,
+                                   log_image_iter, to_rgb_fcn, ignore_index, model_used, model_loss_fn_a, model_loss_fn_b, model_loss_fn_a_ratio, model_loss_fn_b_ratio,
+                                #    model_loss_fn_a, model_loss_fn_b, model_loss_fn_a_ratio,model_loss_fn_b_ratio, 
                                    optimizer_name, **kwargs)
     except KeyError:
         print(f'Could not find model named: {model_name}')
+
     return model

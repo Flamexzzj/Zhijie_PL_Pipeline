@@ -13,9 +13,17 @@ class EarlyFusionModel(WaterSegmentationModel):
                  to_rgb_fcn=None,
                  ignore_index=None,
                  model_used = None,
+                 model_loss_fn_a=None,
+                 model_loss_fn_b=None,
+                 model_loss_fn_a_ratio=None,
+                 model_loss_fn_b_ratio=None,
                  optimizer_name=None):
         self.model_used = model_used
         self.optimizer_name = optimizer_name
+        self.model_loss_fn_a = model_loss_fn_a
+        self.model_loss_fn_b = model_loss_fn_b
+        self.model_loss_fn_a_ratio = model_loss_fn_a_ratio
+        self.model_loss_fn_b_ratio = model_loss_fn_b_ratio
         super().__init__(in_channels,
                          n_classes,
                          lr,
@@ -23,6 +31,10 @@ class EarlyFusionModel(WaterSegmentationModel):
                          to_rgb_fcn,
                          ignore_index=ignore_index,
                          model_used=model_used,
+                         model_loss_fn_a=model_loss_fn_a,
+                         model_loss_fn_b=model_loss_fn_b,
+                         model_loss_fn_a_ratio=model_loss_fn_a_ratio,
+                         model_loss_fn_b_ratio=model_loss_fn_b_ratio,
                          optimizer_name=optimizer_name)
 
     def forward(self, batch):

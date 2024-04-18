@@ -12,6 +12,65 @@ from PL_Support_Codes.models.unet import UNet_CBAM
 # from PL_Support_Codes.models.unet import UNet
 from PL_Support_Codes.tools import create_conf_matrix_pred_image
 
+class DiceLoss(nn.Module):
+    def __init__(self, ignore_index=None):
+        super().__init__()
+        self.ignore_index = ignore_index
+
+    def forward(self, logits, true):
+        smooth = 1.0
+        logits = torch.softmax(logits, dim=1)
+        device = logits.device
+        true = true.long()
+        
+        # Create one-hot encoding for true labels
+        true_one_hot = torch.eye(logits.size(1), device=device)[true]
+        true_one_hot = true_one_hot.permute(0, 3, 1, 2)
+
+        if self.ignore_index is not None:
+            mask = true != self.ignore_index
+            logits = logits * mask.unsqueeze(1)
+            true_one_hot = true_one_hot * mask.unsqueeze(1)
+        
+        intersection = torch.sum(logits * true_one_hot, dim=(0, 2, 3))
+        cardinality = torch.sum(logits + true_one_hot, dim=(0, 2, 3))
+        dice_loss = (2. * intersection + smooth) / (cardinality + smooth)
+        return (1 - dice_loss).mean()
+    
+class FocalLoss(nn.Module):
+    def __init__(self, alpha=None, gamma=2, ignore_index=None, reduction='mean'):
+        super(FocalLoss, self).__init__()
+        self.gamma = gamma
+        self.alpha = alpha
+        self.ignore_index = ignore_index
+        self.reduction = reduction
+
+    def forward(self, inputs, targets):
+        # Ensure inputs are of float type and targets are long (for one_hot and nll_loss)
+        inputs = inputs.float()
+        targets = targets.long()
+
+        # Handle ignore_index by masking
+        if self.ignore_index is not None:
+            mask = targets != self.ignore_index
+            inputs = inputs * mask.unsqueeze(1)
+            targets = targets * mask
+
+        # Calculate softmax over the inputs
+        BCE_loss = nn.functional.cross_entropy(inputs, targets, reduction='none', weight=self.alpha, ignore_index=self.ignore_index)
+
+        # Get the probabilities of the targets
+        pt = torch.exp(-BCE_loss)
+
+        # Calculate Focal Loss
+        focal_loss = ((1 - pt) ** self.gamma) * BCE_loss
+
+        if self.reduction == 'mean':
+            return focal_loss.mean()
+        elif self.reduction == 'sum':
+            return focal_loss.sum()
+        else:
+            return focal_loss
 
 class WaterSegmentationModel(pl.LightningModule):
 
@@ -53,7 +112,9 @@ class WaterSegmentationModel(pl.LightningModule):
         self.tracked_metrics = self._get_tracked_metrics()
 
         LOSS_FUNCS ={
-            'cross_entropy': nn.CrossEntropyLoss
+            'cross_entropy': nn.CrossEntropyLoss,
+            'dice': DiceLoss,
+            'focal': FocalLoss
         }
         
         # Get loss function.

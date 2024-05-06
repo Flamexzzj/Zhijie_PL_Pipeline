@@ -4,13 +4,22 @@ import hydra
 import pytorch_lightning as pl
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
-from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor, Callback
+from pytorch_lightning import Trainer
+from pytorch_lightning.tuner.lr_finder import _LRFinder
+# from lightning.pytorch.tuner import Tuner
+from pytorch_lightning.tuner import Tuner
 
 from PL_Support_Codes.models import build_model
 from PL_Support_Codes.datasets import build_dataset
 from PL_Support_Codes.datasets.utils import generate_image_slice_object
 from PL_Support_Codes.utils.utils_misc import generate_innovation_script
 
+class PrintLearningRateCallback(Callback):
+    def on_train_epoch_end(self, trainer, pl_module):
+        # Access the current learning rate from the optimizer
+        current_lr = trainer.optimizers[0].param_groups[0]['lr']
+        print(f"Current Learning Rate: {current_lr}")
 
 # @hydra.main(version_base="1.1", config_path="conf", config_name="config")
 def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
@@ -67,10 +76,6 @@ def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
 
 
     # Create model.
-    print("This is fit.py, printing cfg.model_kwargs")
-    print(cfg.model_kwargs)
-    print("end of printing cfg.model_kwargs")
-
     model = build_model(cfg.model_name,
                         train_dataset.n_channels,
                         train_dataset.n_classes,
@@ -88,7 +93,7 @@ def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
     # Create logger.
     logger = pl.loggers.TensorBoardLogger(
         save_dir=os.path.join(exp_dir, 'tensorboard_logs'))
-
+    print_lr_callback = PrintLearningRateCallback()
     # Train model.
     checkpoint_callback = ModelCheckpoint(
         dirpath=os.path.join(exp_dir, 'checkpoints'),
@@ -96,21 +101,33 @@ def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
         mode='max',
         monitor="val_MulticlassJaccardIndex",
         filename="model-{epoch:02d}-{val_MulticlassJaccardIndex:.4f}")
+    
+    lr_monitor = LearningRateMonitor(logging_interval='epoch')
+    
+
     trainer = pl.Trainer(max_epochs=cfg.n_epochs,
                          accelerator="gpu", #this will automatically find CUDA or MPS devices
                          devices=1,
                          default_root_dir=exp_dir,
-                         callbacks=[checkpoint_callback],
+                         callbacks=[checkpoint_callback, lr_monitor, print_lr_callback],
                          logger=logger,
                          profiler=cfg.profiler,
                          limit_train_batches=cfg.limit_train_batches,
                          limit_val_batches=cfg.limit_val_batches)
+    # # try:
+    tuner = Tuner(trainer)
+
+    lr_finder = tuner.lr_find(model, train_loader, valid_loader)
+    suggested_lr = lr_finder.suggestion()
+    # print("Suggested Learning Rate:", suggested_lr)
+    model.hparams.lr = suggested_lr 
+
+    
+    
     trainer.fit(model=model,
                 train_dataloaders=train_loader,
                 val_dataloaders=valid_loader)
 
-    # Final evaluation of model on validation set.
-    # trainer.test(model, dataloaders=valid_loader, verbose=True)
 
     # Return best model path.
     return trainer.checkpoint_callback.best_model_path

@@ -38,7 +38,7 @@ train_split_pct: 1.0
 crop_height: 256
 crop_width: 256
 crop_stride: 128
-n_epochs: 1
+n_epochs: 10
 lr: 1e-4
 # optimizer: adamw
 # [adam, sgd, adamw, adamax, adadelta, adagrad, rmsprop, rprop, asgd, lbfgs, sparse_adam, radam, nadam]

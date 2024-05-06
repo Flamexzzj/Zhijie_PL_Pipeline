@@ -196,13 +196,14 @@ class WaterSegmentationModel(pl.LightningModule):
         images, target = batch['image'], batch['target']
         output = self.forward(batch)
 
-        loss = self.model_loss_fn_a_ratio * self.loss_func_a(output, target) + self.model_loss_fn_b_ratio * self.loss_func_b(output, target)
+        loss = self.model_loss_fn_a_ratio * 1 * self.loss_func_a(output, target) + self.model_loss_fn_b_ratio * self.loss_func_b(output, target)
         if torch.isnan(loss):
             # Happens when all numbers are ignore numbers.
             loss = torch.nan_to_num(loss)
         pred = output.argmax(dim=1)
         flat_pred, flat_target = pred.flatten(), batch['target'].flatten()
         metric_output = self.train_metrics(flat_pred, flat_target)
+        metric_output['train_loss_combined'] = loss
         self.log_dict(metric_output,
                       prog_bar=True,
                       on_step=True,
@@ -311,7 +312,12 @@ class WaterSegmentationModel(pl.LightningModule):
             'nadam': optim.NAdam,
         }
         optimizer = OPTIMIZERS[self.optimizer_name](self.parameters(), lr=self.lr)
-        return optimizer
+        lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10, eta_min=0)
+        # lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1)
+        #### TODO: this is a newline
+        optim_dict = {'optimizer': optimizer, 'lr_scheduler': lr_scheduler}
+        return optim_dict
+    
     def on_before_batch_transfer(self, batch, dataloader_idx=0):
     # Function to convert tensors to float32, leaving other data types unchanged
         def to_float32(item):

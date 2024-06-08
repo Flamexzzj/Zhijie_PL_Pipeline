@@ -9,6 +9,7 @@ import pytorch_lightning as pl
 
 from PL_Support_Codes.models.unet import UNet_Orig
 from PL_Support_Codes.models.unet import UNet_CBAM
+from PL_Support_Codes.models.unet import ReXNetV1
 # from PL_Support_Codes.models.unet import UNet
 from PL_Support_Codes.tools import create_conf_matrix_pred_image
 
@@ -110,11 +111,14 @@ class WaterSegmentationModel(pl.LightningModule):
         if self.ignore_index == -1:
             self.ignore_index = self.n_classes - 1
         self.tracked_metrics = self._get_tracked_metrics()
-
+# TODO: find all loss funcs here
+#https://pytorch.org/docs/stable/nn.html#loss-functions
         LOSS_FUNCS ={
             'cross_entropy': nn.CrossEntropyLoss,
             'dice': DiceLoss,
-            'focal': FocalLoss
+            'focal': FocalLoss,
+            'l1': nn.L1Loss,
+            'mse': nn.MSELoss
         }
         
         # Get loss function.
@@ -128,8 +132,8 @@ class WaterSegmentationModel(pl.LightningModule):
         print("!!!!!!!!!!!!")
         print("Model used: ",model_used)
         print("n_classes: ", n_classes)
-        print(in_channels)
-        print(ignore_index)
+        print("in_channels: ", in_channels)
+        print("ignore_index: ", ignore_index)
         print("optimizer_name: ",optimizer_name)
         print(lr)
         print("!!!!!!!!!!!!")
@@ -175,7 +179,8 @@ class WaterSegmentationModel(pl.LightningModule):
                 n_in_channels += feature_channels
         MODELS_USED = {
             'unet_orig': UNet_Orig,
-            'unet_cbam': UNet_CBAM
+            'unet_cbam': UNet_CBAM,
+            'rexnet': ReXNetV1
         }
         print("Model used!!!!!!!!!: ",MODELS_USED[self.model_used])
         self.model = MODELS_USED[self.model_used](n_in_channels, self.n_classes)
@@ -314,7 +319,6 @@ class WaterSegmentationModel(pl.LightningModule):
         optimizer = OPTIMIZERS[self.optimizer_name](self.parameters(), lr=self.lr)
         lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10, eta_min=0)
         # lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1)
-        #### TODO: this is a newline
         optim_dict = {'optimizer': optimizer, 'lr_scheduler': lr_scheduler}
         return optim_dict
     

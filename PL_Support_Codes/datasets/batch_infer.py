@@ -23,7 +23,7 @@ class Batch_Infer_Dataset(BaseDataset):
                  transforms=None,
                  sensor='PS',
                  channels=None,
-                 dset_name="thp_timeseries",
+                 dset_name="batch_infer",
                  seed_num=0,
                  n_classes=3,
                  output_metadata=False,
@@ -70,12 +70,12 @@ class Batch_Infer_Dataset(BaseDataset):
         n_images = 0
         region_name = image_dir.split('/')[-2]
         print(region_name)
-        image_paths = sorted(glob(image_dir + '*.tif'))
+        image_paths = sorted(glob(image_dir + '*SR.tif'))
         year = 2019
         month = 10
         day = 1
-        # breakpoint()
-        # pass
+        breakpoint()
+        pass
 
         for image_path in image_paths:
             # Get image size.

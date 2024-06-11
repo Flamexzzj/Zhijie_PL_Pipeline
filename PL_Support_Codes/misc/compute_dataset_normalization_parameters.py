@@ -135,7 +135,7 @@ def main():
                             dem=args.include_dem,
                             slope=args.include_slope,
                             eval_region = None,
-                            channels = 'ALL')
+                            channels = 'ALL', n_classes=3)
 
     # Check save path for normalization parameters.
     if args.norm_save_path is None:

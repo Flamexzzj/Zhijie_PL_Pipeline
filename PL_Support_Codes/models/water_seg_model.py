@@ -12,67 +12,304 @@ from PL_Support_Codes.models.unet import UNet_CBAM
 from PL_Support_Codes.models.unet import ReXNetV1
 # from PL_Support_Codes.models.unet import UNet
 from PL_Support_Codes.tools import create_conf_matrix_pred_image
+from ._functional import soft_dice_score, to_tensor
+from ._functional import focal_loss_with_logits
+# class DiceLoss(nn.Module):
+#     def __init__(self, ignore_index=None):
+#         super().__init__()
+#         self.ignore_index = ignore_index
 
-class DiceLoss(nn.Module):
-    def __init__(self, ignore_index=None):
-        super().__init__()
-        self.ignore_index = ignore_index
-
-    def forward(self, logits, true):
-        smooth = 1.0
-        logits = torch.softmax(logits, dim=1)
-        device = logits.device
-        true = true.long()
+#     def forward(self, logits, true):
+#         smooth = 1.0
+#         logits = torch.softmax(logits, dim=1)
+#         device = logits.device
+#         true = true.long()
         
-        # Create one-hot encoding for true labels
-        true_one_hot = torch.eye(logits.size(1), device=device)[true]
-        true_one_hot = true_one_hot.permute(0, 3, 1, 2)
+#         # Create one-hot encoding for true labels
+#         true_one_hot = torch.eye(logits.size(1), device=device)[true]
+#         true_one_hot = true_one_hot.permute(0, 3, 1, 2)
 
-        if self.ignore_index is not None:
-            mask = true != self.ignore_index
-            logits = logits * mask.unsqueeze(1)
-            true_one_hot = true_one_hot * mask.unsqueeze(1)
+#         if self.ignore_index is not None:
+#             mask = true != self.ignore_index
+#             logits = logits * mask.unsqueeze(1)
+#             true_one_hot = true_one_hot * mask.unsqueeze(1)
         
-        intersection = torch.sum(logits * true_one_hot, dim=(0, 2, 3))
-        cardinality = torch.sum(logits + true_one_hot, dim=(0, 2, 3))
-        dice_loss = (2. * intersection + smooth) / (cardinality + smooth)
-        return (1 - dice_loss).mean()
+#         intersection = torch.sum(logits * true_one_hot, dim=(0, 2, 3))
+#         cardinality = torch.sum(logits + true_one_hot, dim=(0, 2, 3))
+#         dice_loss = (2. * intersection + smooth) / (cardinality + smooth)
+#         return (1 - dice_loss).mean()
+
+#: Loss binary mode suppose you are solving binary segmentation task.
+#: That mean yor have only one class which pixels are labled as **1**,
+#: the rest pixels are background and labeled as **0**.
+#: Target mask shape - (N, H, W), model output mask shape (N, 1, H, W).
+BINARY_MODE: str = "binary"
+
+#: Loss multiclass mode suppose you are solving multi-**class** segmentation task.
+#: That mean you have *C = 1..N* classes which have unique label values,
+#: classes are mutually exclusive and all pixels are labeled with theese values.
+#: Target mask shape - (N, H, W), model output mask shape (N, C, H, W).
+MULTICLASS_MODE: str = "multiclass"
+
+#: Loss multilabel mode suppose you are solving multi-**label** segmentation task.
+#: That mean you have *C = 1..N* classes which pixels are labeled as **1**,
+#: classes are not mutually exclusive and each class have its own *channel*,
+#: pixels in each channel which are not belong to class labeled as **0**.
+#: Target mask shape - (N, C, H, W), model output mask shape (N, C, H, W).
+MULTILABEL_MODE: str = "multilabel"
+
     
-class FocalLoss(nn.Module):
-    def __init__(self, alpha=None, gamma=2, ignore_index=None, reduction='mean'):
-        super(FocalLoss, self).__init__()
-        self.gamma = gamma
-        self.alpha = alpha
+# class FocalLoss(nn.Module):
+#     def __init__(self, alpha=None, gamma=2, ignore_index=None, reduction='mean'):
+#         super(FocalLoss, self).__init__()
+#         self.gamma = gamma
+#         self.alpha = alpha
+#         self.ignore_index = ignore_index
+#         self.reduction = reduction
+
+#     def forward(self, inputs, targets):
+#         # Ensure inputs are of float type and targets are long (for one_hot and nll_loss)
+#         inputs = inputs.float()
+#         targets = targets.long()
+
+#         # Handle ignore_index by masking
+#         if self.ignore_index is not None:
+#             mask = targets != self.ignore_index
+#             inputs = inputs * mask.unsqueeze(1)
+#             targets = targets * mask
+
+#         # Calculate softmax over the inputs
+#         BCE_loss = nn.functional.cross_entropy(inputs, targets, reduction='none', weight=self.alpha, ignore_index=self.ignore_index)
+
+#         # Get the probabilities of the targets
+#         pt = torch.exp(-BCE_loss)
+
+#         # Calculate Focal Loss
+#         focal_loss = ((1 - pt) ** self.gamma) * BCE_loss
+
+#         if self.reduction == 'mean':
+#             return focal_loss.mean()
+#         elif self.reduction == 'sum':
+#             return focal_loss.sum()
+#         else:
+#             return focal_loss
+from functools import partial
+from ._functional import focal_loss_with_logits
+from typing import Optional, List
+
+import torch
+import torch.nn.functional as F
+from torch.nn.modules.loss import _Loss
+from ._functional import soft_dice_score, to_tensor
+class FocalLoss(_Loss):
+    def __init__(
+        self,
+        # mode: str,
+        alpha: Optional[float] = None,
+        gamma: Optional[float] = 2.0,
+        ignore_index: Optional[int] = None,
+        reduction: Optional[str] = "mean",
+        normalized: bool = False,
+        reduced_threshold: Optional[float] = None,
+    ):
+        """Compute Focal loss
+
+        Args:
+            mode: Loss mode 'binary', 'multiclass' or 'multilabel'
+            alpha: Prior probability of having positive value in target.
+            gamma: Power factor for dampening weight (focal strength).
+            ignore_index: If not None, targets may contain values to be ignored.
+                Target values equal to ignore_index will be ignored from loss computation.
+            normalized: Compute normalized focal loss (https://arxiv.org/pdf/1909.07829.pdf).
+            reduced_threshold: Switch to reduced focal loss. Note, when using this mode you
+                should use `reduction="sum"`.
+
+        Shape
+             - **y_pred** - torch.Tensor of shape (N, C, H, W)
+             - **y_true** - torch.Tensor of shape (N, H, W) or (N, C, H, W)
+
+        Reference
+            https://github.com/BloodAxe/pytorch-toolbelt
+
+        """
+        # assert mode in {BINARY_MODE, MULTILABEL_MODE, MULTICLASS_MODE}
+        super().__init__()
+
+        self.mode = "multiclass"
         self.ignore_index = ignore_index
-        self.reduction = reduction
+        self.focal_loss_fn = partial(
+            focal_loss_with_logits,
+            alpha=alpha,
+            gamma=gamma,
+            reduced_threshold=reduced_threshold,
+            reduction=reduction,
+            normalized=normalized,
+        )
 
-    def forward(self, inputs, targets):
-        # Ensure inputs are of float type and targets are long (for one_hot and nll_loss)
-        inputs = inputs.float()
-        targets = targets.long()
+    def forward(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
+        if self.mode in {BINARY_MODE, MULTILABEL_MODE}:
+            y_true = y_true.view(-1)
+            y_pred = y_pred.view(-1)
 
-        # Handle ignore_index by masking
-        if self.ignore_index is not None:
-            mask = targets != self.ignore_index
-            inputs = inputs * mask.unsqueeze(1)
-            targets = targets * mask
+            if self.ignore_index is not None:
+                # Filter predictions with ignore label from loss computation
+                not_ignored = y_true != self.ignore_index
+                y_pred = y_pred[not_ignored]
+                y_true = y_true[not_ignored]
 
-        # Calculate softmax over the inputs
-        BCE_loss = nn.functional.cross_entropy(inputs, targets, reduction='none', weight=self.alpha, ignore_index=self.ignore_index)
+            loss = self.focal_loss_fn(y_pred, y_true)
 
-        # Get the probabilities of the targets
-        pt = torch.exp(-BCE_loss)
+        elif self.mode == MULTICLASS_MODE:
+            num_classes = y_pred.size(1)
+            loss = 0
 
-        # Calculate Focal Loss
-        focal_loss = ((1 - pt) ** self.gamma) * BCE_loss
+            # Filter anchors with -1 label from loss computation
+            if self.ignore_index is not None:
+                not_ignored = y_true != self.ignore_index
 
-        if self.reduction == 'mean':
-            return focal_loss.mean()
-        elif self.reduction == 'sum':
-            return focal_loss.sum()
+            for cls in range(num_classes):
+                cls_y_true = (y_true == cls).long()
+                cls_y_pred = y_pred[:, cls, ...]
+
+                if self.ignore_index is not None:
+                    cls_y_true = cls_y_true[not_ignored]
+                    cls_y_pred = cls_y_pred[not_ignored]
+
+                loss += self.focal_loss_fn(cls_y_pred, cls_y_true)
+
+        return loss
+
+
+
+
+
+
+class DiceLoss(_Loss):
+    def __init__(
+        self,
+        # mode: str,
+        classes: Optional[List[int]] = None,
+        log_loss: bool = False,
+        from_logits: bool = True,
+        smooth: float = 0.0,
+        ignore_index: Optional[int] = None,
+        eps: float = 1e-7,
+    ):
+        """Dice loss for image segmentation task.
+        It supports binary, multiclass and multilabel cases
+
+        Args:
+            mode: Loss mode 'binary', 'multiclass' or 'multilabel'
+            classes:  List of classes that contribute in loss computation. By default, all channels are included.
+            log_loss: If True, loss computed as `- log(dice_coeff)`, otherwise `1 - dice_coeff`
+            from_logits: If True, assumes input is raw logits
+            smooth: Smoothness constant for dice coefficient (a)
+            ignore_index: Label that indicates ignored pixels (does not contribute to loss)
+            eps: A small epsilon for numerical stability to avoid zero division error
+                (denominator will be always greater or equal to eps)
+
+        Shape
+             - **y_pred** - torch.Tensor of shape (N, C, H, W)
+             - **y_true** - torch.Tensor of shape (N, H, W) or (N, C, H, W)
+
+        Reference
+            https://github.com/BloodAxe/pytorch-toolbelt
+        """
+        # assert mode in {BINARY_MODE, MULTILABEL_MODE, MULTICLASS_MODE}
+        super(DiceLoss, self).__init__()
+        self.mode = 'multiclass'
+        # if classes is not None:
+        #     assert (
+        #         mode != BINARY_MODE
+        #     ), "Masking classes is not supported with mode=binary"
+        #     classes = to_tensor(classes, dtype=torch.long)
+
+        self.classes = classes
+        self.from_logits = from_logits
+        self.smooth = smooth
+        self.eps = eps
+        self.log_loss = log_loss
+        self.ignore_index = ignore_index
+
+    def forward(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
+        assert y_true.size(0) == y_pred.size(0)
+
+        if self.from_logits:
+            # Apply activations to get [0..1] class probabilities
+            # Using Log-Exp as this gives more numerically stable result and does not cause vanishing gradient on
+            # extreme values 0 and 1
+            if self.mode == MULTICLASS_MODE:
+                y_pred = y_pred.log_softmax(dim=1).exp()
+            else:
+                y_pred = F.logsigmoid(y_pred).exp()
+
+        bs = y_true.size(0)
+        num_classes = y_pred.size(1)
+        dims = (0, 2)
+
+        if self.mode == BINARY_MODE:
+            y_true = y_true.view(bs, 1, -1)
+            y_pred = y_pred.view(bs, 1, -1)
+
+            if self.ignore_index is not None:
+                mask = y_true != self.ignore_index
+                y_pred = y_pred * mask
+                y_true = y_true * mask
+
+        if self.mode == MULTICLASS_MODE:
+            y_true = y_true.view(bs, -1)
+            y_pred = y_pred.view(bs, num_classes, -1)
+
+            if self.ignore_index is not None:
+                mask = y_true != self.ignore_index
+                y_pred = y_pred * mask.unsqueeze(1)
+
+                y_true = F.one_hot(
+                    (y_true * mask).to(torch.long), num_classes
+                )  # N,H*W -> N,H*W, C
+                y_true = y_true.permute(0, 2, 1) * mask.unsqueeze(1)  # N, C, H*W
+            else:
+                y_true = F.one_hot(y_true, num_classes)  # N,H*W -> N,H*W, C
+                y_true = y_true.permute(0, 2, 1)  # N, C, H*W
+
+        if self.mode == MULTILABEL_MODE:
+            y_true = y_true.view(bs, num_classes, -1)
+            y_pred = y_pred.view(bs, num_classes, -1)
+
+            if self.ignore_index is not None:
+                mask = y_true != self.ignore_index
+                y_pred = y_pred * mask
+                y_true = y_true * mask
+
+        scores = self.compute_score(
+            y_pred, y_true.type_as(y_pred), smooth=self.smooth, eps=self.eps, dims=dims
+        )
+
+        if self.log_loss:
+            loss = -torch.log(scores.clamp_min(self.eps))
         else:
-            return focal_loss
+            loss = 1.0 - scores
 
+        # Dice loss is undefined for non-empty classes
+        # So we zero contribution of channel that does not have true pixels
+        # NOTE: A better workaround would be to use loss term `mean(y_pred)`
+        # for this case, however it will be a modified jaccard loss
+
+        mask = y_true.sum(dims) > 0
+        loss *= mask.to(loss.dtype)
+
+        if self.classes is not None:
+            loss = loss[self.classes]
+
+        return self.aggregate_loss(loss)
+
+    def aggregate_loss(self, loss):
+        return loss.mean()
+
+    def compute_score(
+        self, output, target, smooth=0.0, eps=1e-7, dims=None
+    ) -> torch.Tensor:
+        return soft_dice_score(output, target, smooth, eps, dims)
 class WaterSegmentationModel(pl.LightningModule):
 
     def __init__(self,
@@ -108,8 +345,8 @@ class WaterSegmentationModel(pl.LightningModule):
         self._build_model()
 
         # Get metrics.
-        if self.ignore_index == -1:
-            self.ignore_index = self.n_classes - 1
+        # if self.ignore_index == -1:
+        #     self.ignore_index = self.n_classes - 1
         self.tracked_metrics = self._get_tracked_metrics()
 # TODO: find all loss funcs here
 #https://pytorch.org/docs/stable/nn.html#loss-functions
@@ -200,8 +437,10 @@ class WaterSegmentationModel(pl.LightningModule):
         self._set_model_to_train()
         images, target = batch['image'], batch['target']
         output = self.forward(batch)
+        loss_a = self.loss_func_a(output, target)
+        loss_b = self.loss_func_b(output, target)
 
-        loss = self.model_loss_fn_a_ratio * 1 * self.loss_func_a(output, target) + self.model_loss_fn_b_ratio * self.loss_func_b(output, target)
+        loss = self.model_loss_fn_a_ratio * 1 * loss_a + self.model_loss_fn_b_ratio * loss_b
         if torch.isnan(loss):
             # Happens when all numbers are ignore numbers.
             loss = torch.nan_to_num(loss)
@@ -209,6 +448,8 @@ class WaterSegmentationModel(pl.LightningModule):
         flat_pred, flat_target = pred.flatten(), batch['target'].flatten()
         metric_output = self.train_metrics(flat_pred, flat_target)
         metric_output['train_loss_combined'] = loss
+        metric_output['train_loss_a'] = loss_a
+        metric_output['train_loss_b'] = loss_b
         self.log_dict(metric_output,
                       prog_bar=True,
                       on_step=True,

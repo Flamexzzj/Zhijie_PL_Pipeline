@@ -5,7 +5,7 @@ defaults:
 
 hydra:
   run:
-    dir: ../Model_in_progress/${now:%Y-%m-%d}/S1F11_crossValidate_S1_512/
+    dir: ../Model_in_progress/${now:%Y-%m-%d}/test/
   output_subdir: ./hydra/
 
 # Dataset parameters
@@ -18,7 +18,7 @@ dataset_kwargs:
 
 # Model parameters
 model_name: ef_model # ef_model, lf_model
-model_used: rexnet # net_orig, unet_cbam, rexnet
+model_used: unet_cbam # # net_orig, unet_cbam, rexnet
 model_n_classes: 3 # one class for ignore index, one for not water and one for water
 model_loss_fn_a: focal # cross_entropy, focal_loss, dice_loss, tversky_loss, tversky_focal_loss
 model_loss_fn_a_ratio: 0.5
@@ -58,7 +58,7 @@ limit_val_batches: null # int, maximum number of valiidation batches per epoch.
 log_image_iter: 200 # How often to log images during training and validation steps
 
 # Data transform hyperparameters.
-norm_mode: local # [null: No normalization, local: each image is normalized separately, global: use precomputed normalization parameters]
+norm_mode: null # [null: No normalization, local: each image is normalized separately, global: use precomputed normalization parameters]
 
 # Transforms.
 transforms:

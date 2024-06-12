@@ -18,7 +18,8 @@ dataset_kwargs:
 
 # Model parameters
 model_name: ef_model # ef_model, lf_model
-model_used: unet_cbam # # net_orig, unet_cbam, rexnet
+# model_used: unet_cbam # # net_orig, unet_cbam, rexnet
+model_used: rexnet_unet
 model_n_classes: 3 # one class for ignore index, one for not water and one for water
 model_loss_fn_a: focal # cross_entropy, focal_loss, dice_loss, tversky_loss, tversky_focal_loss
 model_loss_fn_a_ratio: 0.5

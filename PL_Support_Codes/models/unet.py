@@ -612,13 +612,36 @@ class UNetDecoder(nn.Module):
 # End of late fusion model
 ###################################################################################################################################
 
+## fastai implementation of RexnetUNet
+import timm
+from fastai.vision.models.unet import DynamicUnet
+
+def create_timm_body(arch, pretrained=True, n_in=3, cut=None):
+    model = timm.create_model(arch, pretrained=pretrained, features_only=True, in_chans=n_in)
+    if cut is None:
+        cut = -1
+    return nn.Sequential(*list(model.children())[:cut])
+class RexnetUNet(nn.Module):
+    def __init__(self, n_channels, n_classes,base_model="rexnet_150"):
+        super(RexnetUNet, self).__init__()
+        self.n_channels = n_channels
+        self.n_classes = n_classes
+        self.base_model = create_timm_body(base_model, pretrained=True, n_in=n_channels)
+        self.model = DynamicUnet(self.base_model, n_classes,(256,256))
+    def forward(self, x):
+        x = self.model(x)
+        return x
+
+
 if __name__ == '__main__':
     # Create an example input to model.
-    b, c, h, w = 2, 3, 300, 300
+    b, c, h, w = 2, 3, 256, 256
     fake_image = torch.zeros([b, c, h, w])
 
     # Create model.
-    model = UNet(c, 2)
+    # model = UNet(c, 2)
+    model = RexnetUNet(c, 2)
+
 
     # Pass data through model.
     if torch.cuda.is_available():

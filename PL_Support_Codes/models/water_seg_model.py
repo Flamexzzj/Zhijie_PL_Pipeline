@@ -10,6 +10,7 @@ import pytorch_lightning as pl
 from PL_Support_Codes.models.unet import UNet_Orig
 from PL_Support_Codes.models.unet import UNet_CBAM
 from PL_Support_Codes.models.unet import ReXNetV1
+from PL_Support_Codes.models.unet import RexnetUNet
 # from PL_Support_Codes.models.unet import UNet
 from PL_Support_Codes.tools import create_conf_matrix_pred_image
 from ._functional import soft_dice_score, to_tensor
@@ -417,7 +418,8 @@ class WaterSegmentationModel(pl.LightningModule):
         MODELS_USED = {
             'unet_orig': UNet_Orig,
             'unet_cbam': UNet_CBAM,
-            'rexnet': ReXNetV1
+            'rexnet': ReXNetV1,
+            'rexnet_unet':RexnetUNet
         }
         print("Model used!!!!!!!!!: ",MODELS_USED[self.model_used])
         self.model = MODELS_USED[self.model_used](n_in_channels, self.n_classes)

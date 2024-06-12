@@ -101,8 +101,8 @@ def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
         save_last=True,
         every_n_epochs=4,
         mode='max',
-        monitor="val_MulticlassJaccardIndex",
-        filename="model-{epoch:02d}-{val_MulticlassJaccardIndex:.4f}")
+        monitor="val_MulticlassJaccardIndex", 
+        filename="model-{epoch:02d}-{val_MulticlassJaccardIndex:.4f}") # val_MulticlassJaccardIndex change its type to string
     
     lr_monitor = LearningRateMonitor(logging_interval='epoch')
     
@@ -119,10 +119,10 @@ def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
     # # try:
     tuner = Tuner(trainer)
 
-    lr_finder = tuner.lr_find(model, train_loader, valid_loader,min_lr=1e-6, max_lr=9e-4, num_training=100)
-    suggested_lr = lr_finder.suggestion()
+    # lr_finder = tuner.lr_find(model, train_loader, valid_loader,min_lr=1e-6, max_lr=9e-4, num_training=100)
+    # suggested_lr = lr_finder.suggestion()
     # print("Suggested Learning Rate:", suggested_lr)
-    model.hparams.lr = suggested_lr 
+    # model.hparams.lr = suggested_lr 
 
     
     

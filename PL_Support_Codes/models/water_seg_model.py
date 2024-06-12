@@ -406,7 +406,7 @@ class WaterSegmentationModel(pl.LightningModule):
         for metric_name, metric_func in self.tracked_metrics.items():
             metric_value = metric_func(flat_pred, flat_target)
             metric_value = torch.nan_to_num(metric_value)
-            batch_metrics[metric_name] = metric_value
+            batch_metrics[metric_name] = metric_value.item()
         return batch_metrics
 
     def _build_model(self):
@@ -449,6 +449,7 @@ class WaterSegmentationModel(pl.LightningModule):
         pred = output.argmax(dim=1)
         flat_pred, flat_target = pred.flatten(), batch['target'].flatten()
         metric_output = self.train_metrics(flat_pred, flat_target)
+
         metric_output['train_loss_combined'] = loss
         metric_output['train_loss_a'] = loss_a
         metric_output['train_loss_b'] = loss_b
@@ -494,10 +495,21 @@ class WaterSegmentationModel(pl.LightningModule):
         pred = output.argmax(dim=1)
         flat_pred, flat_target = pred.flatten(), batch['target'].flatten()
         metric_output = self.valid_metrics(flat_pred, flat_target)
+        # metric_output['val_MulticlassF1Score'] = metric_output['val_MulticlassF1Score'].item()
+        # metric_output['val_MulticlassJaccardIndex'] = metric_output['val_MulticlassJaccardIndex'].item()
+
+        # metric_output['val_MulticlassAccuracy'] = metric_output['val_MulticlassAccuracy'].item()
         self.valid_metrics.update(flat_pred, flat_target)
 
         # Log metrics and loss.
         metric_output['valid_loss'] = loss
+
+        for key, value in  metric_output.items():
+            if isinstance(value, torch.Tensor):
+                metric_output[key] = value.item()
+            else:
+                metric_output[key] = value
+
         self.log_dict(metric_output,
                       prog_bar=True,
                       on_step=True,
@@ -536,6 +548,7 @@ class WaterSegmentationModel(pl.LightningModule):
         pred = output.argmax(dim=1)
         flat_pred, flat_target = pred.flatten(), batch['target'].flatten()
         self.test_metrics.update(flat_pred, flat_target)
+
 
         # Log metrics and loss.
         self.log_dict({'test_loss': loss},

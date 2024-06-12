@@ -110,7 +110,8 @@ class Combined_Dataset(BaseDataset):
             region_dirs_dict[region_name] = region_dir
 
         image_paths = self._split_data(region_dirs_dict, sensor_name)
-
+        # for debug
+        # image_paths = image_paths[:10]
         n_images = 0
         self.dataset = []
         for image_path, region_name in image_paths:
@@ -654,7 +655,7 @@ class Combined_Dataset(BaseDataset):
         # Get ignore label.
         x, y = np.where((label == 0))
         binary_label[x, y] = self.ignore_index
-
+        # print(np.unique(binary_label))
         return binary_label
 
     def __getitem__(self, index, output_metadata=False):

@@ -119,7 +119,7 @@ def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
     # # try:
     tuner = Tuner(trainer)
 
-    lr_finder = tuner.lr_find(model, train_loader, valid_loader,min_lr=1e-6, max_lr=5e-4, num_training=100)
+    lr_finder = tuner.lr_find(model, train_loader, valid_loader,min_lr=1e-6, max_lr=9e-4, num_training=100)
     suggested_lr = lr_finder.suggestion()
     # print("Suggested Learning Rate:", suggested_lr)
     model.hparams.lr = suggested_lr 

@@ -60,7 +60,7 @@ class BaseDataset(Dataset):
 
         if self.norm_mode == 'global':
             self.global_norm_params = load_global_dataset_norm_params(
-                self.dset_name)
+                self.dset_name == 'combined')
 
     def _set_random_seed(self, seed_num):
         if type(seed_num) is not int:

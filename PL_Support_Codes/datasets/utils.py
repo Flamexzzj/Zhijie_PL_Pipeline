@@ -265,7 +265,7 @@ def load_global_dataset_norm_params(dataset_name, norm_param_path=None):
     all_norm_params = pickle.load(open(norm_save_path, 'rb'))
 
     try:
-        norm_params = all_norm_params[dataset_name]
+        norm_params = all_norm_params['combined']
     except KeyError:
         raise (
             f'Normalization parameters is not available for dataset name "{dataset_name}"'

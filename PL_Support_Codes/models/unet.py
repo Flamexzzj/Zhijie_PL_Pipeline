@@ -627,7 +627,7 @@ class RexnetUNet(nn.Module):
         self.n_channels = n_channels
         self.n_classes = n_classes
         self.base_model = create_timm_body(base_model, pretrained=True, n_in=n_channels)
-        self.model = DynamicUnet(self.base_model, n_classes,(256,256))
+        self.model = DynamicUnet(self.base_model, n_classes,(256,256), self_attention=True)
     def forward(self, x):
         x = self.model(x)
         return x

@@ -5,7 +5,7 @@ defaults:
 
 hydra:
   run:
-    dir: ../Model_in_progress/${now:%Y-%m-%d}/rexnet_csda_only/
+    dir: ../Model_in_progress/${now:%Y-%m-%d}/rexnet_csda_spsHTX_attention_noNorm/
   output_subdir: ./hydra/
 
 # Dataset parameters
@@ -59,7 +59,7 @@ limit_val_batches: null # int, maximum number of valiidation batches per epoch.
 log_image_iter: 200 # How often to log images during training and validation steps
 
 # Data transform hyperparameters.
-norm_mode: global # [null: No normalization, local: each image is normalized separately, global: use precomputed normalization parameters]
+norm_mode: null # [null: No normalization, local: each image is normalized separately, global: use precomputed normalization parameters]
 
 # Transforms.
 transforms:

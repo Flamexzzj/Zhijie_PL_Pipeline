@@ -51,6 +51,10 @@ A repository containing experiments investigating the improvement of adding temp
 
 `python ./PL_Support_Codes/fit.py 'eval_reigon=[region_name_1, region_name_2]'`
 
+# Run inference with trained models:
+
+`python Batch_infer_new_models.py`
+
 # Visualize model training with Tensorboard
 
 ## Within VSCode

@@ -35,7 +35,8 @@ dependencies:
     - tifffile
     - earthengine-api
     - geemap
+
+
     - pip:
         - bayesian-optimization
         - facenet-pytorch
-        

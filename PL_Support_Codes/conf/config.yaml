@@ -5,12 +5,12 @@ defaults:
 
 hydra:
   run:
-    dir: ../Model_in_progress/${now:%Y-%m-%d}/rexnet_csda_spsHTX_attention_noNorm/
+    dir: ../Model_in_progress/${now:%Y-%m-%d}/rexnet_wx_90_S1_try2/
   output_subdir: ./hydra/
 
 # Dataset parameters
 dataset_name: combined
-dataset_sensor: PS
+dataset_sensor: S1 # S1 S2 PS
 dataset_channels: ALL
 dataset_kwargs:
   dem: False
@@ -32,20 +32,20 @@ model_kwargs:
   #feat_fusion: concat_conv 
 
 # Split hyperparameters
-eval_region: Nepal # [null, BEI, CMO, CTO, DKA, GIL, HTX, KTM, NSW, PNE, SPS]
+eval_region: test # [null, BEI, CMO, CTO, DKA, GIL, HTX, KTM, NSW, PNE, SPS]
 train_split_pct: 1.0
 
 # General hyperparameters.
 crop_height: 256
 crop_width: 256
-crop_stride: 128
+crop_stride: 256
 n_epochs: 45
-lr: 1e-4
+lr: 5e-6
 # optimizer: adamw
 # [adam, sgd, adamw, adamax, adadelta, adagrad, rmsprop, rprop, asgd, lbfgs, sparse_adam, radam, nadam]
-batch_size: 16
+batch_size: 18
 n_workers: 0
-save_topk_models: 8
+save_topk_models: 16
 ignore_index: -1
 seed_num: 0
 
@@ -59,7 +59,7 @@ limit_val_batches: null # int, maximum number of valiidation batches per epoch.
 log_image_iter: 200 # How often to log images during training and validation steps
 
 # Data transform hyperparameters.
-norm_mode: null # [null: No normalization, local: each image is normalized separately, global: use precomputed normalization parameters]
+norm_mode: local # [null: No normalization, local: each image is normalized separately, global: use precomputed normalization parameters]
 
 # Transforms.
 transforms:

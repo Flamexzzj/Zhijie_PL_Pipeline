@@ -25,6 +25,7 @@ class PrintLearningRateCallback(Callback):
 def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
     torch.set_default_tensor_type(torch.FloatTensor)
 
+    resume_training = False
     # Get experiment directory.
     if overwrite_exp_dir is None:
         exp_dir = os.getcwd()
@@ -118,21 +119,27 @@ def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
                          limit_val_batches=cfg.limit_val_batches)
     # # try:
     tuner = Tuner(trainer)
+########original_lr_setting########
+    lr_finder = tuner.lr_find(model, train_loader, valid_loader,min_lr=1e-6, max_lr=9e-4, num_training=100)
+    ##############
+    # lr_finder = tuner.lr_find(model, train_loader, valid_loader,min_lr=1e-8, max_lr=8e-7, num_training=100)
+    suggested_lr = lr_finder.suggestion()
+    print("Suggested Learning Rate:", suggested_lr)
+    model.hparams.lr = suggested_lr 
 
-    # lr_finder = tuner.lr_find(model, train_loader, valid_loader,min_lr=1e-6, max_lr=9e-4, num_training=100)
-    # suggested_lr = lr_finder.suggestion()
-    # print("Suggested Learning Rate:", suggested_lr)
-    # model.hparams.lr = suggested_lr 
-
-    
-    
-    trainer.fit(model=model,
+    if resume_training:
+        trainer.fit(model=model,
                 train_dataloaders=train_loader,
-                val_dataloaders=valid_loader)
+                val_dataloaders=valid_loader,
+                ckpt_path=r"E:\Zhijie_PL_Pipeline\Trained_model\RexNet_Unet_csda_2thp\checkpoints\model-epoch=23-val_MulticlassJaccardIndex=0.8515.ckpt")
+    else:
+        trainer.fit(model=model,
+                    train_dataloaders=train_loader,
+                    val_dataloaders=valid_loader)
 
 
-    # Return best model path.
-    return trainer.checkpoint_callback.best_model_path
+    # # Return best model path.
+    # return trainer.checkpoint_callback.best_model_path
 
 
 @hydra.main(version_base="1.1", config_path="conf", config_name="config")

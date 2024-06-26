@@ -88,7 +88,8 @@ class Combined_Dataset(BaseDataset):
         root_dir_path = Path(self.root_dir)
 
         # Using pathlib's glob method to find all subdirectories within the 'CSDAP' directory
-        csdap_region_dirs = sorted(root_dir_path.glob('CSDAP/*'))
+        # csdap_region_dirs = sorted(root_dir_path.glob('CSDAP/*'))
+        csdap_region_dirs = sorted(root_dir_path.glob('S1_WX/*'))
 
         # Extracting the region names from the paths
         csdap_region_names = [p.parts[-1] for p in csdap_region_dirs if p.name != '.DS_Store']

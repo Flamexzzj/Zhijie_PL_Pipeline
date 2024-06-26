@@ -110,7 +110,7 @@ def main():
                         type=int,
                         default=512,
                         help='The height and width of the loaded crops.')
-    parser.add_argument('--subsample_pct', type=float, default=0.1,
+    parser.add_argument('--subsample_pct', type=float, default=0.4,
                         help='Percentage of usuable pixels per image to collect for computing norm parameters. This decreases the ' \
                              'storage and time required to compute dataset norm params.')
     parser.add_argument('--include_dem',

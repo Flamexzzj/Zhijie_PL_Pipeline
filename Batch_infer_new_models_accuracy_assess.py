@@ -37,12 +37,12 @@ model_loss_fn_a_infer_ratio = 1
 model_loss_fn_b_infer_ratio = 0
 
 
-base_save_dir = r"E:\Zhijie_PL_Pipeline\Infered_result\RGV_2019_test_train1_ep43"
-checkpoint_path = r"E:\Zhijie_PL_Pipeline\Model_in_progress\2024-06-24\rexnet_finetune_all_30_final\checkpoints\model-epoch=43-val_MulticlassJaccardIndex=0.7704.ckpt"
+base_save_dir = r"E:\Zhijie_PL_Pipeline\Infered_result\rexnet_fine_tune11_ep64"
+checkpoint_path = r"E:\Zhijie_PL_Pipeline\Model_in_progress\2024-06-23\rexnet_finetune11\checkpoints\model-epoch=64-val_MulticlassJaccardIndex=0.7855.ckpt"
 # checkpoint_path = r"E:\Zhijie_PL_Pipeline\Trained_model\Unet_PS_models\checkpoints\model-epoch=06-val_MulticlassJaccardIndex=0.8755.ckpt"
 
 # Root folder containing the directories you waant to run inference on, under this folder, there should be different dates folder, within the dates folder, there should be imgs
-ROOT_FOLDER = r"E:\Zhijie_PL_Pipeline\DATA\RGV_2019_test\\"
+ROOT_FOLDER = r"E:\Zhijie_PL_Pipeline\DATA\CombinedDataset_1122\RGV_local\cross_validate\\"
 
 # JSON file path
 JSON_FILE = r"E:\Zhijie_PL_Pipeline\Zhijie_PL_Pipeline\dataset_dirs.json"
@@ -163,7 +163,8 @@ def infer_here():
                 # Check if image stitcher exists for this region.
                 if region_name not in pred_canvases.keys():
                     # Get base save directories.
-                    pred_save_dir = os.path.join(base_save_dir, region_name + '_pred')
+                    # pred_save_dir = os.path.join(base_save_dir, region_name + '_pred')
+                    pred_save_dir = os.path.join(base_save_dir, region_name)
 
                     # Initialize image stitchers.
                     pred_canvases[region_name] = ImageStitcher(pred_save_dir, save_backend='tifffile', save_ext='.tif')
@@ -217,4 +218,202 @@ for dir in os.listdir(ROOT_FOLDER):
         infer_here()
         
 
+
+
+# %%
+# import os
+# import numpy as np
+# import pandas as pd
+# from sklearn.metrics import f1_score, jaccard_score, accuracy_score
+# from PIL import Image
+# from osgeo import gdal
+
+# def load_image(file_path, is_tif=False):
+#     if is_tif:
+#         dataset = gdal.Open(file_path)
+#         band = dataset.GetRasterBand(1)
+#         array = band.ReadAsArray()
+#         return array
+#     else:
+#         return np.array(Image.open(file_path))
+
+# def calculate_metrics(ground_truth, prediction):
+#     # Flatten the arrays to 1D for metric calculation
+#     ground_truth = ground_truth.flatten()
+#     prediction = prediction.flatten()
+    
+#     # Overall Accuracy
+#     oa = accuracy_score(ground_truth, prediction)
+    
+#     # F1 Score
+#     f1 = f1_score(ground_truth, prediction, average='weighted')
+    
+#     # Intersection over Union
+#     iou = jaccard_score(ground_truth, prediction, average='weighted')
+    
+#     return oa, f1, iou
+
+# def main(folder_a, folder_b, output_csv):
+#     results = []
+    
+#     for file_name in os.listdir(folder_a):
+#         if file_name.endswith('.jpg'):
+#             # Construct file paths
+#             ground_truth_path = os.path.join(folder_a, file_name)
+#             prediction_path = os.path.join(folder_b, file_name.replace('.jpg', '.tif'))
+            
+#             if not os.path.exists(prediction_path):
+#                 print(f"Prediction file not found for {file_name}")
+#                 continue
+            
+#             # Load images
+#             ground_truth = load_image(ground_truth_path)
+#             prediction = load_image(prediction_path, is_tif=True)
+            
+#             # Calculate metrics
+#             oa, f1, iou = calculate_metrics(ground_truth, prediction)
+            
+#             # Store results
+#             results.append({
+#                 'Image': file_name,
+#                 'Overall Accuracy': oa,
+#                 'F1 Score': f1,
+#                 'IoU': iou
+#             })
+    
+#     # Create a DataFrame
+#     df = pd.DataFrame(results)
+    
+#     # Calculate overall metrics
+#     overall_metrics = pd.DataFrame([{
+#         'Image': 'Overall',
+#         'Overall Accuracy': df['Overall Accuracy'].mean(),
+#         'F1 Score': df['F1 Score'].mean(),
+#         'IoU': df['IoU'].mean()
+#     }])
+    
+#     # Concatenate overall metrics
+#     df = pd.concat([df, overall_metrics], ignore_index=True)
+    
+#     # Save to CSV
+#     df.to_csv(output_csv, index=False)
+#     print(f"Results saved to {output_csv}")
+
+# # Define the directories and output file
+# # base_save_dir = r"E:\Zhijie_PL_Pipeline\Infered_result\rexnet_csda_spsHTX_attention_noNorm_ep23"
+# ground_truth_dir = r'E:\RGV_DATA\RGV_30_labels'
+# # prediction_dir = r'E:\Zhijie_PL_Pipeline\Infered_result\rexnet_thponly_attention_globalNorm_ep41_RGV\RGV_240603_30'
+# prediction_dir = os.path.join(base_save_dir, 'RGV_240603_30')
+# output_csv = prediction_dir.split('\\RGV_240603_30')[0] + '\\accuracy.csv'
+
+# # Run the main function
+# main(ground_truth_dir, prediction_dir, output_csv)
+
+import os
+import numpy as np
+import pandas as pd
+from sklearn.metrics import f1_score, jaccard_score, accuracy_score
+from PIL import Image
+from osgeo import gdal
+
+def load_image(file_path, is_tif=False):
+    if is_tif:
+        dataset = gdal.Open(file_path)
+        band = dataset.GetRasterBand(1)
+        array = band.ReadAsArray()
+        return array
+    else:
+        return np.array(Image.open(file_path))
+
+def calculate_metrics(ground_truth, prediction):
+    # Flatten the arrays to 1D for metric calculation
+    ground_truth = ground_truth.flatten()
+    prediction = prediction.flatten()
+    
+    # Overall Accuracy
+    oa = accuracy_score(ground_truth, prediction)
+    
+    # F1 Score
+    f1 = f1_score(ground_truth, prediction, average='weighted')
+    
+    # Intersection over Union
+    iou = jaccard_score(ground_truth, prediction, average='weighted')
+    
+    return oa, f1, iou
+
+def main(folder_gt, folder_pred, output_csv):
+    results = []
+    missing_gt_files = []
+    
+    for file_name in os.listdir(folder_pred):
+        if file_name.endswith('.tif'):
+            # Construct file paths
+            prediction_path = os.path.join(folder_pred, file_name)
+            ground_truth_path = os.path.join(folder_gt, file_name.replace('.tif', '.jpg'))
+            
+            if not os.path.exists(ground_truth_path):
+                print(f"Ground truth file not found for {file_name}")
+                missing_gt_files.append(file_name)
+                continue
+            
+            # Load images
+            ground_truth = load_image(ground_truth_path)
+            prediction = load_image(prediction_path, is_tif=True)
+            
+            # Calculate metrics
+            oa, f1, iou = calculate_metrics(ground_truth, prediction)
+            
+            # Store results
+            results.append({
+                'Image': file_name,
+                'Overall Accuracy': oa,
+                'F1 Score': f1,
+                'IoU': iou
+            })
+    
+    # Create a DataFrame
+    df = pd.DataFrame(results)
+    
+    # Calculate overall metrics
+    overall_metrics = pd.DataFrame([{
+        'Image': 'Overall',
+        'Overall Accuracy': df['Overall Accuracy'].mean(),
+        'F1 Score': df['F1 Score'].mean(),
+        'IoU': df['IoU'].mean()
+    }])
+
+     # Print overall metrics
+    print(f"Overall Accuracy:", overall_metrics['Overall Accuracy'])
+    print(f"F1:", overall_metrics['F1 Score'])
+    print(f"IoU:", overall_metrics['IoU'])
+    # print(f"F1 Score: {overall_metrics['F1 Score']:.4f}")
+    # print(f"IoU: {overall_metrics['IoU']:.4f}")
+    # print(f"Overall Accuracy: {overall_metrics['Overall Accuracy']:.4f}")
+    # print(f"F1 Score: {overall_metrics['F1 Score']:.4f}")
+    # print(f"IoU: {overall_metrics['IoU']:.4f}")
+    
+    # Concatenate overall metrics
+    df = pd.concat([df, overall_metrics], ignore_index=True)
+    
+    # Save to CSV
+    df.to_csv(output_csv, index=False)
+    print(f"Results saved to {output_csv}")
+
+    # Save missing ground truth files
+    missing_gt_file_path = output_csv.replace('.csv', '_missing_gt_files.txt')
+    with open(missing_gt_file_path, 'w') as f:
+        for missing_file in missing_gt_files:
+            f.write(f"{missing_file}\n")
+    print(f"Missing ground truth files saved to {missing_gt_file_path}")
+
+# Define the directories and output file
+# base_save_dir = r"E:\Zhijie_PL_Pipeline\Infered_result\rexnet_csda_spsHTX_attention_noNorm_ep23"
+ground_truth_dir = r'E:\RGV_DATA\RGV_30_labels'
+# prediction_dir = r'E:\Zhijie_PL_Pipeline\Infered_result\rexnet_thponly_attention_globalNorm_ep41_RGV\RGV_240603_30'
+# sub_folder_keyword= 'PS'   'RGV_240603_30'
+prediction_dir = os.path.join(base_save_dir, 'PS')
+output_csv = prediction_dir.split('\\PS')[0] + '\\accuracy.csv'
+
+# Run the main function
+main(ground_truth_dir, prediction_dir, output_csv)
 

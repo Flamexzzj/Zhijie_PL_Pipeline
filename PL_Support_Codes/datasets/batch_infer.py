@@ -71,7 +71,7 @@ class Batch_Infer_Dataset(BaseDataset):
         region_name = image_dir.split('\\')[-2]
         print(region_name)
         image_paths = sorted(glob(image_dir + '*SR.tif') + glob(image_dir + '*SR_clip.tif'))
-        # image_paths = sorted(glob(image_dir + '*SR.tif'))
+        # image_paths = sorted(glob(image_dir + '*.tif'))
         year = 2019
         month = 10
         day = 1

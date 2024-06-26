@@ -4,17 +4,27 @@ A repository containing experiments investigating the improvement of adding temp
 
 # Install
 
-### Create conda environment from environment.yml file:
+### Create conda environment from yml file. this installs pytorch, alongwith geospatial librarieslike rasterio and GDAL and also GEE:
 
-`conda env create -f environment.yml`
+`conda env create -f win_torch_ee_gdal.yml`
 
 ### Activate environment:
 
-`conda activate st_water`
+`conda activate geotorchee`
 
 ### Run setup.py:
 
 `pip install -e ./`
+
+### Run the following commands:
+
+`pip install tensorboard`
+
+`pip install tensorboardX`
+
+`pip install timm`
+
+`conda install -c fastai fastai`
 
 # Setup dataset directories:
 
@@ -35,11 +45,11 @@ A repository containing experiments investigating the improvement of adding temp
 
 # Train a model with default parameters:
 
-`python ./st_water_seg/fit.py`
+`python ./PL_Support_Codes/fit.py`
 
 ## Train a model with multiple eval regions in validation set.
 
-`python ./st_water_seg/fit.py 'eval_reigon=[region_name_1, region_name_2]'`
+`python ./PL_Support_Codes/fit.py 'eval_reigon=[region_name_1, region_name_2]'`
 
 # Visualize model training with Tensorboard
 

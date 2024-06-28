@@ -61,6 +61,10 @@ Note: Use the 'combined' dataset to train models of different sensors. Use the "
 
 `python Batch_infer_new_models.py`
 
+# Geo-referencing, cloud masking, and compressing the flood maps
+
+`python georef_cloud_mask_compress.py`
+
 # Visualize model training with Tensorboard
 
 ## Within VSCode

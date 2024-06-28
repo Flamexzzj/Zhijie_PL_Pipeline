@@ -38,16 +38,19 @@ A repository containing experiments investigating the improvement of adding temp
   "s1floods": "/media/mule/Projects/NASA/CSDAP/Data/Public_Dataset/S1F11/"
 }
 ```
-
-# Formatting
+Note: Use the 'combined' dataset to train models of different sensors. Use the "batch_infer" dataset for batch inference
+# Formatting your code
 
 `find . -name '*.py' -print0 | xargs -0 yapf -i`
 
-# Train a model with default parameters:
+# Steps of training a model
 
-`python ./PL_Support_Codes/fit.py`
+1. Adjust the file path of 'combined' in 'dataset_dirs.json'   
+2. Go to 'combined.py' under 'PL_Support_Codes/datasets' to make sure the directory points to the dataset you want to train on  
+3. Adjust Hyperparameters and settings in 'confid.yml' under 'PL_Support_Codes/conf'  
+4. Run `python ./PL_Support_Codes/fit.py`  
 
-## Train a model with multiple eval regions in validation set.
+## The pipeline also takes args in command line to change settings, for example:
 
 `python ./PL_Support_Codes/fit.py 'eval_reigon=[region_name_1, region_name_2]'`
 

@@ -23,9 +23,9 @@ dependencies:
     - flask
     - boto3
     - ipykernel
+    - rasterio
     - fiona
     - shapely
-    - rasterio
     - pyproj
     - pandas
     - geopandas
@@ -35,8 +35,3 @@ dependencies:
     - tifffile
     - earthengine-api
     - geemap
-
-
-    - pip:
-        - bayesian-optimization
-        - facenet-pytorch

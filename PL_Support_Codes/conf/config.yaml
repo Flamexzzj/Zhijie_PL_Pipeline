@@ -5,12 +5,12 @@ defaults:
 
 hydra:
   run:
-    dir: ../Model_in_progress/${now:%Y-%m-%d}/rexnet_wx_90_S1_try2/
+    dir: ../Model_in_progress/${now:%Y-%m-%d}/rexnet_cadap_all_localNorm/
   output_subdir: ./hydra/
 
 # Dataset parameters
 dataset_name: combined
-dataset_sensor: S1 # S1 S2 PS
+dataset_sensor: PS # S1 S2 PS
 dataset_channels: ALL
 dataset_kwargs:
   dem: False
@@ -32,7 +32,7 @@ model_kwargs:
   #feat_fusion: concat_conv 
 
 # Split hyperparameters
-eval_region: test # [null, BEI, CMO, CTO, DKA, GIL, HTX, KTM, NSW, PNE, SPS]
+eval_region: LittleRock # [null, BEI, CMO, CTO, DKA, GIL, HTX, KTM, NSW, PNE, SPS]
 train_split_pct: 1.0
 
 # General hyperparameters.
@@ -43,7 +43,7 @@ n_epochs: 45
 lr: 5e-6
 # optimizer: adamw
 # [adam, sgd, adamw, adamax, adadelta, adagrad, rmsprop, rprop, asgd, lbfgs, sparse_adam, radam, nadam]
-batch_size: 18
+batch_size: 23
 n_workers: 0
 save_topk_models: 16
 ignore_index: -1

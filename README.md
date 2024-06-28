@@ -1,6 +1,9 @@
-# Spatial+Temporal Water Segmentation
+# Flood Segmentation and inference pipeline
 
-A repository containing experiments investigating the improvement of adding temporal rainfall data for water segmentation.
+This pipeline combines pytorch-lightning, fastai, and HuggingFace.  
+The pipeline can handle 4 sensors so far (PS, S1, S2, L8).  
+The pipeline is insensitive to input sizes, meaning the input images for training doesn;t necessary have the same pixel size.   
+The training img and labels also doesn't have to have the same pixel size.
 
 # Install
 

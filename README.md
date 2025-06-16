@@ -29,6 +29,8 @@ The training img and labels also doesn't have to have the same pixel size.
 
 `conda install -c fastai fastai`
 
+`conda install -c conda-forge torch-lr-finder`
+
 # Setup dataset directories:
 
 ### On Minnow machine fill in dataset_dirs.json with:

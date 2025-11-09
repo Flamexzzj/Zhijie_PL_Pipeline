@@ -185,8 +185,7 @@ class CSDAP_Dataset(BaseDataset):
                     self.root_dir, label_folder_name, region_name,
                     image_name.split('-')[0] + '_labeled.tif')
                 if os.path.exists(label_path) is False:
-                    breakpoint()
-                    pass
+                    raise FileNotFoundError(f'Label file not found: {label_path}')
 
             label_info = rasterio.open(label_path)
             label_height, label_width = label_info.height, label_info.width

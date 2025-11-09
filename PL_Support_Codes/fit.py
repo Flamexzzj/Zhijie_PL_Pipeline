@@ -128,10 +128,14 @@ def fit_model(cfg: DictConfig, overwrite_exp_dir: str = None) -> str:
     model.hparams.lr = suggested_lr 
 
     if resume_training:
+        # Get checkpoint path from config or use None
+        ckpt_path = cfg.get('resume_checkpoint_path', None)
+        if ckpt_path is None:
+            raise ValueError("resume_training is True but 'resume_checkpoint_path' not specified in config")
         trainer.fit(model=model,
                 train_dataloaders=train_loader,
                 val_dataloaders=valid_loader,
-                ckpt_path=r"E:\Zhijie_PL_Pipeline\Trained_model\RexNet_Unet_csda_2thp\checkpoints\model-epoch=23-val_MulticlassJaccardIndex=0.8515.ckpt")
+                ckpt_path=ckpt_path)
     else:
         trainer.fit(model=model,
                     train_dataloaders=train_loader,

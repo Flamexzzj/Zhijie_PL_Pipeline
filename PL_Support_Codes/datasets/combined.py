@@ -129,9 +129,7 @@ class Combined_Dataset(BaseDataset):
 
                                       
             if os.path.exists(label_path) is False:
-                print('Label file not found for image file: ')
-                breakpoint()
-                pass
+                raise FileNotFoundError(f'Label file not found: {label_path}')
 
             # Get label width and height.
             label_info = rasterio.open(label_path)
@@ -551,11 +549,9 @@ class Combined_Dataset(BaseDataset):
 
         # Subselect channels.
         if channels == 'RGB':
-            breakpoint()
             r_band, g_band, b_band = image[2], image[1], image[0]
             image = np.stack([r_band, g_band, b_band], axis=0)
         elif channels == 'RGB_NIR':
-            breakpoint()
             r_band, g_band, b_band, nir_band = image[2], image[1], image[
                 0], image[3]
             image = np.stack([r_band, g_band, b_band, nir_band], axis=0)

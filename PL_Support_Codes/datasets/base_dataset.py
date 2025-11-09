@@ -110,7 +110,7 @@ class BaseDataset(Dataset):
                 f'Normalization mode "{self.norm_mode}" not implemented.')
 
         image -= mean
-        image /= std
+        image /= (std + 1e-8)  # Add epsilon to prevent division by zero
         norm_image = image
 
         return norm_image, mean, std
@@ -157,9 +157,6 @@ class BaseDataset(Dataset):
                 raise NotImplementedError
 
             return mean, std
-
-        breakpoint()
-        pass
 
         # Check if normalization parameters have already been generated.
         save_path = os.path.join(self.root_dir,
@@ -310,9 +307,7 @@ class BaseDataset(Dataset):
         if (image_height == desired_height) and (image_width == desired_width):
             return image
         elif (image_height > desired_height) and (image_width > desired_width):
-            print('Image is larger than desired resolution. Error!!')
-            breakpoint()
-            pass
+            raise ValueError(f'Image is larger than desired resolution. Image: ({image_height}, {image_width}), Desired: ({desired_height}, {desired_width})')
         else:
             if buffer_mode == 'constant':
                 # Create buffer canvas.

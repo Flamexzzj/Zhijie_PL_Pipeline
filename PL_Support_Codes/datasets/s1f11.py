@@ -103,8 +103,7 @@ class S1F11(BaseDataset):
                                       'labels', image_name + '.tif')
                                       
             if os.path.exists(label_path) is False:
-                breakpoint()
-                pass
+                raise FileNotFoundError(f'Label file not found: {label_path}')
 
             # TODO: Get label width and height.
             # label_info = rasterio.open(label_path)

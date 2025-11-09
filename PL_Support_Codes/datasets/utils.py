@@ -260,8 +260,9 @@ def load_global_dataset_norm_params(dataset_name, norm_param_path=None):
     # ASSUMPTION: norm_params are saved in base directory of github repo.
     # Load norm_param file.
     utils_file_dir = os.path.dirname(os.path.realpath(__file__))
-    norm_save_path = os.path.join('\\'.join(utils_file_dir.split('\\')[:-2]),
-                                  'dataset_norm_params.p')
+    # Go up two directories from utils.py location (datasets/utils.py -> PL_Support_Codes -> root)
+    base_dir = os.path.dirname(os.path.dirname(utils_file_dir))
+    norm_save_path = os.path.join(base_dir, 'dataset_norm_params.p')
     all_norm_params = pickle.load(open(norm_save_path, 'rb'))
 
     try:

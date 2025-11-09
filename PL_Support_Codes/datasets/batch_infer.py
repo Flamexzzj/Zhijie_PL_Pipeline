@@ -403,11 +403,9 @@ class Batch_Infer_Dataset(BaseDataset):
 
         # Subselect channels.
         if channels == 'RGB':
-            breakpoint()
             r_band, g_band, b_band = image[2], image[1], image[0]
             image = np.stack([r_band, g_band, b_band], axis=0)
         elif channels == 'RGB_NIR':
-            breakpoint()
             r_band, g_band, b_band, nir_band = image[2], image[1], image[
                 0], image[3]
             image = np.stack([r_band, g_band, b_band, nir_band], axis=0)
@@ -548,9 +546,6 @@ if __name__ == '__main__':
     float_stitchers = {}
     for i in tqdm(range(n_examples)):
         example = dataset.__getitem__(i)
-        if True:
-            breakpoint()
-            pass
 
         image = example['image']
         metadata = example['metadata']

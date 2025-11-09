@@ -358,24 +358,27 @@ class WaterSegmentationModel(pl.LightningModule):
             'l1': nn.L1Loss,
             'mse': nn.MSELoss
         }
-        
+
+        # Loss functions that support ignore_index parameter
+        LOSSES_WITH_IGNORE_INDEX = {'cross_entropy', 'focal'}
+
         # Get loss function.
-        self.loss_func_a = LOSS_FUNCS[self.model_loss_fn_a](ignore_index=self.ignore_index)
-        self.loss_func_b = LOSS_FUNCS[self.model_loss_fn_b](ignore_index=self.ignore_index)
+        if self.model_loss_fn_a in LOSSES_WITH_IGNORE_INDEX:
+            self.loss_func_a = LOSS_FUNCS[self.model_loss_fn_a](ignore_index=self.ignore_index)
+        else:
+            self.loss_func_a = LOSS_FUNCS[self.model_loss_fn_a]()
+
+        if self.model_loss_fn_b in LOSSES_WITH_IGNORE_INDEX:
+            self.loss_func_b = LOSS_FUNCS[self.model_loss_fn_b](ignore_index=self.ignore_index)
+        else:
+            self.loss_func_b = LOSS_FUNCS[self.model_loss_fn_b]()
 
         # Log images hyperparamters.
         self.to_rgb_fcn = to_rgb_fcn
         self.log_image_iter = log_image_iter
-        print("!!!!!!!!!!!!")
-        print("!!!!!!!!!!!!")
-        print("Model used: ",model_used)
-        print("n_classes: ", n_classes)
-        print("in_channels: ", in_channels)
-        print("ignore_index: ", ignore_index)
-        print("optimizer_name: ",optimizer_name)
-        print(lr)
-        print("!!!!!!!!!!!!")
-        print("!!!!!!!!!!!!")
+        # Log model configuration
+        print(f"Model Configuration: {model_used}, n_classes={n_classes}, in_channels={in_channels}, "
+              f"ignore_index={ignore_index}, optimizer={optimizer_name}, lr={lr}")
 
 
 

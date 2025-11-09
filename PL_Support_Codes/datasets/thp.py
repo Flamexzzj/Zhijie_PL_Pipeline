@@ -265,8 +265,7 @@ class THP_Dataset(BaseDataset):
             label_path = os.path.join(base_dir, region_name, 'labels',
                                       image_name + '.tif')
             if os.path.exists(label_path) is False:
-                breakpoint()
-                pass
+                raise FileNotFoundError(f'Label file not found: {label_path}')
 
             # Get label width and height.
             label_info = rasterio.open(label_path)
@@ -398,8 +397,7 @@ class THP_Dataset(BaseDataset):
             label_path = os.path.join(base_dir, region_name, 'labels',
                                       image_name.split('-')[0] + '.tif')
             if os.path.exists(label_path) is False:
-                breakpoint()
-                pass
+                raise FileNotFoundError(f'Label file not found: {label_path}')
 
             # Get label width and height.
             label_info = rasterio.open(label_path)
@@ -513,8 +511,7 @@ class THP_Dataset(BaseDataset):
             label_path = os.path.join(base_dir, region_name, 'labels',
                                       image_name + '.tif')
             if os.path.exists(label_path) is False:
-                breakpoint()
-                pass
+                raise FileNotFoundError(f'Label file not found: {label_path}')
 
             # Get label width and height.
             label_info = rasterio.open(label_path)
